@@ -17,11 +17,34 @@ class AuthController {
 
   static async login(req, res) {
     try {
-      const { email, password } = req.validatedData
-      const result = await Auth.login(email, password)
+      const { emailOrUsername, password } = req.validatedData
+      const result = await Auth.login(emailOrUsername, password)
       res.status(200).json(result)
     } catch (error) {
-      res.status(400).json({ error: 'Error al iniciar sesión.' })
+      console.error('Error en login:', error)
+      res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async confirmarCuenta(req, res) {
+    try {
+      const { userId, codigo } = req.body
+      const result = await Auth.confirmarCuenta(userId, codigo)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error en confirmarCuenta', error)
+      res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const userId = req.user.id
+      const result = await Auth.delete(userId)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error en delete:', error)
+      res.status(400).json({ error: error.message })
     }
   }
 }
