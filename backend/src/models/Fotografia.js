@@ -11,7 +11,7 @@ class Fotografia {
     return data
   }
 
-  static async subir(data) {
+  static async upload(data) {
     const { data: nuevaFoto, error } = await supabase
       .from('fotografias')
       .insert([data])

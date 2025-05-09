@@ -158,7 +158,7 @@ class Auth {
     }
   }
 
-  static async confirmarCuenta(userId, codigo) {
+  static async verifyAccount(userId, codigo) {
     const { data: user, error } = await adminClient
       .from('usuarios')
       .select('codigo_verificacion, verificado')
@@ -196,6 +196,137 @@ class Auth {
       throw new Error('No se pudo eliminar el usuario en la base de datos')
 
     return { message: 'Usuario eliminado correctamente' }
+  }
+
+  static async update(
+    userId,
+    {
+      nombre,
+      apellidos,
+      pais,
+      fecha_nacimiento,
+      foto_perfil,
+      email,
+      display_name,
+    }
+  ) {
+    let updateFields = {}
+
+    if (nombre) updateFields.nombre = nombre
+    if (apellidos) updateFields.apellidos = apellidos
+    if (pais) updateFields.pais = pais
+    if (fecha_nacimiento) updateFields.fecha_nacimiento = fecha_nacimiento
+
+    // Validar display_name único si cambia
+    if (display_name) {
+      const { data: existing } = await adminClient
+        .from('usuarios')
+        .select('id')
+        .eq('display_name', display_name)
+        .neq('id', userId)
+        .single()
+
+      if (existing) {
+        throw new Error('El nombre de usuario ya está en uso')
+      }
+
+      updateFields.display_name = display_name
+    }
+
+    // Subir nueva imagen si la hay
+    if (foto_perfil?.buffer && foto_perfil?.mimetype) {
+      const buffer = foto_perfil.buffer
+      const mimetype = foto_perfil.mimetype
+
+      const { error: uploadError } = await adminStorageClient.storage
+        .from('perfiles')
+        .upload(`fotos/${userId}.jpg`, buffer, {
+          contentType: mimetype,
+          upsert: true,
+        })
+
+      if (uploadError) {
+        throw new Error('Error al subir la nueva foto de perfil')
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('perfiles')
+        .getPublicUrl(`fotos/${userId}.jpg`)
+
+      updateFields.foto_perfil = urlData.publicUrl
+    }
+
+    // Actualizar en Supabase Auth si se cambia email o display_name
+    if (email || display_name) {
+      const { error: updateAuthError } =
+        await adminClient.auth.admin.updateUserById(userId, {
+          email: email || undefined,
+          user_metadata: display_name ? { display_name } : undefined,
+        })
+
+      if (updateAuthError) {
+        throw new Error('Error al actualizar los datos en Auth')
+      }
+    }
+
+    // Actualizar en tu tabla `usuarios`
+    const { error } = await adminClient
+      .from('usuarios')
+      .update(updateFields)
+      .eq('id', userId)
+
+    if (error) throw new Error('No se pudo actualizar el perfil')
+
+    return { message: 'Perfil actualizado correctamente' }
+  }
+
+  static async requestPasswordChange(userId) {
+    const codigo = crypto.randomBytes(3).toString('hex')
+
+    const { error } = await adminClient
+      .from('usuarios')
+      .update({ codigo_cambio_password: codigo })
+      .eq('id', userId)
+
+    if (error)
+      throw new Error('Error al iniciar el proceso de cambio de contraseña')
+
+    return {
+      message: 'Código de cambio de contraseña generado',
+      codigo, // Sólo en entorno desarrollo
+    }
+  }
+
+  static async confirmPasswordChange(userId, codigo, nueva_password) {
+    const { data: userRow, error } = await adminClient
+      .from('usuarios')
+      .select('codigo_cambio_password')
+      .eq('id', userId)
+      .single()
+
+    if (error || !userRow) throw new Error('Usuario no encontrado')
+    if (userRow.codigo_cambio_password !== codigo)
+      throw new Error('Código incorrecto')
+
+    const { error: authError } = await adminClient.auth.admin.updateUserById(
+      userId,
+      {
+        password: nueva_password,
+      }
+    )
+
+    if (authError) throw new Error('No se pudo actualizar la contraseña')
+
+    // Limpiar código
+    const { error: clearError } = await adminClient
+      .from('usuarios')
+      .update({ codigo_cambio_password: null })
+      .eq('id', userId)
+
+    if (clearError)
+      throw new Error('Error al limpiar el código de verificación')
+
+    return { message: 'Contraseña actualizada correctamente' }
   }
 }
 

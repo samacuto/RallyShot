@@ -12,10 +12,10 @@ class FotografiaController {
     }
   }
 
-  static async subirFoto(req, res) {
+  static async upload(req, res) {
     try {
       const datos = req.body
-      const nuevaFoto = await Fotografia.subir(datos)
+      const nuevaFoto = await Fotografia.upload(datos)
       res.status(201).json(nuevaFoto)
     } catch (error) {
       res.status(400).json({ error: 'Error al subir la fotografía.' })
