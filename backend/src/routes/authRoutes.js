@@ -1,5 +1,5 @@
 import express from 'express'
-import AuthController from '../controllers/authController.js'
+import AuthController from '../controllers/AuthController.js'
 import { validate } from '../middlewares/validate.js'
 import upload from '../middlewares/upload.js'
 import {
@@ -21,7 +21,7 @@ router.post(
   AuthController.register
 )
 router.post('/login', validate(authLoginSchema), AuthController.login)
-router.post('/confirmar-cuenta', AuthController.verifyAccount)
+router.post('/verify-account', AuthController.verifyAccount)
 router.delete('/me', verifyToken, requireAuth, AuthController.delete)
 router.patch(
   '/me',
@@ -32,7 +32,7 @@ router.patch(
   AuthController.update
 )
 router.post(
-  '/request-cambio-password',
+  '/request-change-password',
   verifyToken,
   requireAuth,
   validate(requestChangePasswordSchema),
@@ -40,8 +40,11 @@ router.post(
 )
 
 router.post(
-  '/confirm-cambio-password',
+  '/confirm-change-password',
   validate(confirmChangePasswordSchema),
   AuthController.confirmPasswordChange
 )
+
+router.post('/forgotten-password', AuthController.forgottenPassword)
+
 export default router
