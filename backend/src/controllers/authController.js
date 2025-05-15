@@ -1,5 +1,6 @@
 import Auth from '../models/Auth.js'
 import { sendRequestChangePassword } from '../services/emailService.js'
+import { sendVerificationCode } from '../services/emailService.js'
 import adminClient from '../supabase/adminClient.js'
 
 class AuthController {
@@ -10,6 +11,21 @@ class AuthController {
         foto_perfil: req.file || null,
       }
       const result = await Auth.register(data)
+
+      // Obtener email real desde Supabase Auth
+      const { data: authUser, error: authError } =
+        await adminClient.auth.admin.getUserById(result.userId)
+
+      if (authError || !authUser?.user?.email) {
+        throw new Error('No se pudo recuperar el email del usuario')
+      }
+
+      // Enviar correo con el código de verificación
+      await sendVerificationCode(
+        authUser.user.email,
+        result.codigo_verificacion
+      )
+
       res.status(201).json(result)
     } catch (error) {
       console.error('Error en register:', error)

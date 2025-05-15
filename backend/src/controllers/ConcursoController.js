@@ -1,6 +1,17 @@
 import Concurso from '../models/Concurso.js'
+import Fotografia from '../models/Fotografia.js'
 
 class ConcursoController {
+  static async getAll(req, res) {
+    try {
+      const contests = await Concurso.getAll()
+      res.status(200).json(contests)
+    } catch (error) {
+      console.error('Error al obtener concursos:', error)
+      res.status(500).json({ error: 'No se pudieron obtener los concursos' })
+    }
+  }
+
   static async create(req, res) {
     try {
       const nuevoId = await Concurso.create(req.body, req.user.id)
@@ -46,6 +57,19 @@ class ConcursoController {
     } catch (error) {
       console.error('Error subiendo foto:', error)
       res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async getPhotosByContest(req, res) {
+    try {
+      const contestId = req.params.id
+
+      const photos = await Fotografia.getByContest(contestId)
+
+      res.status(200).json(photos)
+    } catch (error) {
+      console.error('Error al obtener fotos del concurso:', error)
+      res.status(500).json({ error: 'No se pudieron obtener las fotografías' })
     }
   }
 }

@@ -1,11 +1,13 @@
 import express from 'express'
-import { verifyToken } from '../middlewares/verifyToken.js'
 import { requireAuth } from '../middlewares/requireAuth.js'
 import { requireAdmin } from '../middlewares/requireAdmin.js'
+import { verifyToken } from '../middlewares/verifyToken.js'
 import upload from '../middlewares/upload.js'
 import ConcursoController from '../controllers/ConcursoController.js'
 
 const router = express.Router()
+
+router.get('/', ConcursoController.getAll)
 
 // Crear concurso (admin)
 router.post(
@@ -27,5 +29,7 @@ router.post(
   upload.single('foto'),
   ConcursoController.uploadPhoto
 )
+
+router.get('/:id/photos', ConcursoController.getPhotosByContest)
 
 export default router

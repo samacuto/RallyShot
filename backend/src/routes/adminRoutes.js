@@ -1,7 +1,7 @@
 import express from 'express'
-import { verifyToken } from '../middlewares/verifyToken.js'
 import { requireAuth } from '../middlewares/requireAuth.js'
 import { requireAdmin } from '../middlewares/requireAdmin.js'
+import { verifyToken } from '../middlewares/verifyToken.js'
 
 const router = express.Router()
 

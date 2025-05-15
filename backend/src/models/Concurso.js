@@ -4,6 +4,16 @@ import adminStorageClient from '../supabase/adminStorageClient.js'
 import crypto from 'crypto'
 
 class Concurso {
+  static async getAll() {
+    const { data, error } = await supabase
+      .from('concursos')
+      .select('*')
+      .order('fecha_inicio', { ascending: false })
+
+    if (error) throw new Error('Error al consultar los concursos')
+    return data
+  }
+
   static async create(data, creadoPor) {
     const { data: insertado, error } = await adminClient
       .from('concursos')
