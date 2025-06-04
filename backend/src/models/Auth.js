@@ -184,7 +184,17 @@ class Auth {
     // Eliminar de Supabase Auth
     const { error: authError } = await adminClient.auth.admin.deleteUser(userId)
 
-    if (authError) throw new Error('No se puedo eliminar el usuario de Auth')
+    // Si falla Auth, continuamos con la eliminación en la base de datos
+
+    // Eliminar relaciones en participantes_concurso
+    const { error: relError } = await adminClient
+      .from('participantes_concurso')
+      .delete()
+      .eq('usuario_id', userId)
+
+    if (relError) {
+      throw new Error('No se pudieron eliminar las relaciones del usuario')
+    }
 
     // Eliminar de la tabla usuarios
     const { error: dbError } = await adminClient
@@ -192,8 +202,9 @@ class Auth {
       .delete()
       .eq('id', userId)
 
-    if (dbError)
+    if (dbError) {
       throw new Error('No se pudo eliminar el usuario en la base de datos')
+    }
 
     return { message: 'Usuario eliminado correctamente' }
   }
@@ -327,6 +338,92 @@ class Auth {
       throw new Error('Error al limpiar el código de verificación')
 
     return { message: 'Contraseña actualizada correctamente' }
+  }
+
+  static async getCurrentUser(userId) {
+    console.log('Buscando usuario con id:', userId)
+
+    const { data, error } = await adminClient
+      .from('usuarios')
+      .select('id, nombre, apellidos, rol, foto_perfil, pais, fecha_nacimiento')
+      .eq('id', userId)
+      .single()
+
+    if (error || !data) {
+      console.error('Supabase error:', error)
+      throw new Error('Usuario no encontrado')
+    }
+
+    const { data: authUser, error: authError } =
+      await adminClient.auth.admin.getUserById(userId)
+
+    if (authError || !authUser?.user) {
+      throw new Error('No se pudo recuperar la información de autenticación')
+    }
+
+    return {
+      ...data,
+      email: authUser.user.email,
+      display_name: authUser.user.user_metadata?.display_name || null,
+    }
+  }
+
+  static async getAll() {
+    const { data: usuariosDB, error } = await adminClient
+      .from('usuarios')
+      .select('id, nombre, apellidos, rol, foto_perfil, pais, fecha_nacimiento')
+
+    if (error) throw new Error('Error al obtener los usuarios')
+
+    const { data: usuariosAuth, error: authError } =
+      await adminClient.auth.admin.listUsers()
+
+    if (authError) throw new Error('Error al obtener usuarios de Supabase Auth')
+
+    const usuariosCompletos = usuariosDB.map((user) => {
+      const authUser = usuariosAuth.users.find((u) => u.id === user.id)
+
+      return {
+        ...user,
+        email: authUser?.email || null,
+        display_name: authUser?.user_metadata?.display_name || null,
+      }
+    })
+
+    return usuariosCompletos
+  }
+
+  static async updateById(userId, datos) {
+    return await this.update(userId, datos)
+  }
+
+  static async deleteById(userId) {
+    return await this.delete(userId)
+  }
+
+  static async getById(userId) {
+    const { data: userDB, error: dbError } = await adminClient
+      .from('usuarios')
+      .select('id, nombre, apellidos, rol, foto_perfil, pais, fecha_nacimiento')
+      .eq('id', userId)
+      .single()
+
+    if (dbError || !userDB) {
+      throw new Error('Usuario no encontrado en base de datos')
+    }
+
+    const { data: authUser, error: authError } =
+      await adminClient.auth.admin.getUserById(userId)
+
+    if (authError || !authUser?.user) {
+      throw new Error('No se pudo recuperar los datos de autenticación')
+    }
+
+    return {
+      ...userDB,
+      email: authUser.user.email,
+      display_name: authUser.user.user_metadata?.display_name || null,
+    }
   }
 }
 

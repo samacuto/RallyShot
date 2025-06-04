@@ -1,0 +1,79 @@
+---
+import { Camera, Calendar } from '@lucide/astro'
+import type { Concurso } from '../lib/types/types'
+import WarpBackground from '@components/WarpBackground.tsx'
+
+interface ColorScheme {
+  color1: string
+  color2: string
+  color3: string
+  speed?: number
+  swirl?: number
+  swirlIterations?: number
+  shapeScale?: number
+}
+
+// Define el tipo de las props usando 'type Props'
+type Props = {
+  concurso: Concurso
+  scheme: ColorScheme
+}
+
+// Usa Astro.props sin aserción de tipo inline
+const { concurso, scheme } = Astro.props
+---
+
+<a
+  href={`/concursos/${concurso.id}`}
+  class="block rounded-lg shadow-lg overflow-hidden border-2 border-gray-200
+         transition-transform duration-300 ease-in-out
+         hover:shadow-xl hover:border-indigo-500 hover:scale-[1.01] hover:-rotate-1 cursor-pointer"
+>
+  <div class="relative h-48 w-full overflow-hidden">
+    <WarpBackground
+      client:load
+      color1={scheme.color1}
+      color2={scheme.color2}
+      color3={scheme.color3}
+      speed={scheme.speed ?? 0.3}
+      swirl={scheme.swirl ?? 2.0}
+      swirlIterations={scheme.swirlIterations ?? 10}
+      shapeScale={scheme.shapeScale ?? 0.6}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+      }}
+    />
+    <div class="absolute inset-0 bg-black/40"></div>
+    <h3
+      class="absolute font-limelight text-5xl inset-0 flex items-center text-left text-white px-2 z-10"
+    >
+      <Camera class="w-5 h-5 inline-block mr-2" />
+      {concurso.titulo}
+    </h3>
+  </div>
+
+  <div class="p-6 bg-primary border-t border-gray-200">
+    <p class="text-gray-600 mb-4 line-clamp-2">{concurso.descripcion}</p>
+    <div class="flex justify-between text-sm text-gray-500 mb-4">
+      <div class="flex items-center gap-1">
+        <Calendar class="w-4 h-4" />
+        <span
+          >Inicio: {new Date(concurso.fecha_inicio).toLocaleDateString()}</span
+        >
+      </div>
+      <div class="flex items-center gap-1">
+        <Calendar class="w-4 h-4" />
+        <span>Fin: {new Date(concurso.fecha_fin).toLocaleDateString()}</span>
+      </div>
+    </div>
+    <span
+      class="text-blue-600 font-semibold hover:underline inline-flex items-center gap-1"
+    >
+      Ver más →
+    </span>
+  </div>
+</a>

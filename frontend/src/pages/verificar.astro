@@ -1,0 +1,87 @@
+---
+import Layout from '@layouts/Layout.astro'
+export const prerender = false
+---
+
+<Layout>
+  <section class="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
+    <h1 class="text-xl font-bold mb-4 text-center">Verifica tu cuenta</h1>
+    <form id="verifForm" class="space-y-4">
+      <input
+        required
+        name="userId"
+        id="userId"
+        placeholder="ID de usuario"
+        class="input"
+      />
+      <input
+        required
+        name="codigo"
+        id="codigo"
+        placeholder="Código de verificación"
+        class="input"
+      />
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded"
+        >Confirmar</button
+      >
+    </form>
+    <p id="message" class="mt-4 text-center text-sm"></p>
+  </section>
+
+  <script type="module" is:inline>
+    console.log('🟢 SCRIPT CARGADO')
+
+    const form = document.getElementById('verifForm')
+    const message = document.getElementById('message')
+    const userIdInput = document.getElementById('userId')
+    const codigoInput = document.getElementById('codigo')
+
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('userId')) userIdInput.value = params.get('userId')
+    if (params.get('codigo')) codigoInput.value = params.get('codigo')
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const data = {
+        userId: userIdInput.value.trim(),
+        codigo: codigoInput.value.trim(),
+      }
+
+      console.log('📤 Enviando:', data)
+
+      try {
+        const res = await fetch('/api/verificar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+
+        const result = await res.json()
+        console.log('📥 Respuesta:', result)
+
+        if (res.ok) {
+          message.textContent =
+            '✅ Cuenta verificada correctamente. Redirigiendo...'
+          message.className = 'text-green-600 text-center'
+          setTimeout(() => (window.location.href = '/login'), 3000)
+        } else {
+          message.textContent = '❌ ' + (result.error || 'Error al verificar')
+          message.className = 'text-red-600 text-center'
+        }
+      } catch (err) {
+        console.error('❌ Error al verificar:', err)
+        message.textContent = '❌ Error inesperado. Intenta más tarde.'
+        message.className = 'text-red-600 text-center'
+      }
+    })
+  </script>
+
+  <style>
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+    }
+  </style>
+</Layout>

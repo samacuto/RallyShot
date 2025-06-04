@@ -26,8 +26,15 @@ export const authRegisterSchema = z.object({
       }
     ),
   pais: z.string().min(2, 'El país es obligatorio'),
-  display_name: z.string().min(3, 'El nombre de usuario es obligatorio'),
-  foto_perfil: z.string().optional(),
+  display_name: z
+    .string()
+    .min(3, 'El nombre de usuario debe tener al menos 3 caracteres')
+    .max(20, 'El nombre de usuario no debe superar los 20 caracteres')
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      'Solo se permiten letras, números y guiones bajos'
+    ),
+  foto_perfil: z.any().optional(),
   rol: z.enum(['admin', 'participante']).optional().default('participante'),
 })
 
@@ -53,7 +60,8 @@ export const updateUserSchema = z.object({
       {
         message: 'Debes tener al menos 13 años',
       }
-    ),
+    )
+    .optional(),
   display_name: z.string().min(3).optional(),
   email: z.string().email().optional(),
   foto_perfil: z.any().optional(),
@@ -73,4 +81,15 @@ export const confirmChangePasswordSchema = z.object({
     .refine((val) => /[!@#$%^&*]/.test(val), {
       message: 'Debe incluir un carácter especial',
     }),
+})
+
+export const verifyAccountSchema = z.object({
+  userId: z.string().uuid('ID inválido'),
+  codigo: z.string().length(6, 'El código debe tener 6 caracteres'),
+})
+
+export const forgottenPasswordSchema = z.object({
+  emailOrUsername: z
+    .string()
+    .min(3, 'Debes ingresar un email o nombre de usuario'),
 })

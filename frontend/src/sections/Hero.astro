@@ -1,0 +1,258 @@
+---
+import RallyShotLogo from '@components/RallyShotLogo.astro'
+const { user = null } = Astro.props
+---
+
+<section class="relative h-[60vh] text-white bg-primary overflow-hidden">
+  <!-- Overlay oscuro para contraste -->
+  <div class="absolute inset-0 bg-black/10 -z-0"></div>
+
+  <!-- Contenedor del fondo de puntos -->
+  <div class="absolute inset-0 z-0 pointer-events-none" data-dot-container>
+    <canvas id="dotCanvas" class="w-full h-full"></canvas>
+  </div>
+
+  <!-- Contenido principal de Hero, en z-10 -->
+  <div
+    class="relative h-full flex flex-col items-center justify-center text-center px-4 z-10"
+  >
+    <RallyShotLogo class="w-full max-w-[360px] sm:max-w-[400px]" />
+    <h2
+      class="text-lg mb-8 font-semibold text-gray-300 leading-loose tracking-wide"
+    >
+      Captura el momento. Comparte tu talento.
+    </h2>
+
+    {
+      !user && (
+        <div class="flex gap-4">
+          <a
+            href="/register"
+            class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50"
+          >
+            Regístrate
+          </a>
+          <a
+            href="/login"
+            class="border-2 border-white px-6 py-3 rounded-full font-semibold hover:bg-white/10"
+          >
+            Inicia Sesión
+          </a>
+        </div>
+      )
+    }
+  </div>
+
+  <!-- Script inline que inicializa la animación de puntos -->
+  <script is:inline>
+    ;(() => {
+      // Buscamos el contenedor y el canvas
+      const dotContainerWrapper = document.querySelector('[data-dot-container]')
+      console.log('DotContainer encontrado:', dotContainerWrapper)
+      if (!dotContainerWrapper) return
+
+      const container = dotContainerWrapper.parentElement
+      const canvasEl = document.getElementById('dotCanvas')
+      console.log('Canvas encontrado:', canvasEl)
+      if (!(canvasEl instanceof HTMLCanvasElement)) return
+
+      const ctx = canvasEl.getContext('2d')
+      if (!ctx) {
+        console.log('No se pudo obtener contexto 2D')
+        return
+      }
+
+      // Clase interna que maneja la animación
+      class DotBackground {
+        constructor() {
+          this.container = container
+          this.canvas = canvasEl
+          this.ctx = ctx
+          this.dots = []
+          this.mouse = { x: 0, y: 0 }
+          this.radius = 100
+          this.pinkColor = '#ffffff'
+          this.grayColor = '#cccccc'
+          this.dotSize = 1.0
+          this.dotSpacing = 30
+          this.animationFrameId = null
+          this.init()
+        }
+
+        init() {
+          this.setupCanvas()
+          this.createDots()
+          this.setupEventListeners()
+          this.animate()
+        }
+
+        setupCanvas() {
+          const rect = this.container.getBoundingClientRect()
+          const width = rect.width
+          const height = rect.height
+          const dpr = window.devicePixelRatio || 1
+
+          this.canvas.width = width * dpr
+          this.canvas.height = height * dpr
+          this.ctx.scale(dpr, dpr)
+
+          this.canvas.style.width = `${width}px`
+          this.canvas.style.height = `${height}px`
+        }
+
+        createDots() {
+          const rect = this.container.getBoundingClientRect()
+          const width = rect.width
+          const height = rect.height
+
+          const cols = Math.floor(width / this.dotSpacing)
+          const rows = Math.floor(height / this.dotSpacing)
+
+          for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+              const x = i * this.dotSpacing + this.dotSpacing / 2
+              const y = j * this.dotSpacing + this.dotSpacing / 2
+
+              this.dots.push({
+                x,
+                y,
+                color: this.grayColor,
+                targetColor: this.grayColor,
+                alpha: 0.2,
+                targetAlpha: 0.2,
+                size: this.dotSize,
+              })
+            }
+          }
+        }
+
+        setupEventListeners() {
+          window.addEventListener('resize', this.handleResize.bind(this))
+          document.addEventListener(
+            'mousemove',
+            this.handleMouseMove.bind(this)
+          )
+          document.addEventListener(
+            'touchmove',
+            this.handleTouchMove.bind(this),
+            { passive: true }
+          )
+        }
+
+        handleResize() {
+          if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId)
+          }
+          this.dots = []
+          this.setupCanvas()
+          this.createDots()
+          this.animate()
+        }
+
+        handleMouseMove(e) {
+          const rect = this.container.getBoundingClientRect()
+          this.mouse.x = e.clientX - rect.left
+          this.mouse.y = e.clientY - rect.top
+        }
+
+        handleTouchMove(e) {
+          if (e.touches.length > 0) {
+            const rect = this.container.getBoundingClientRect()
+            this.mouse.x = e.touches[0].clientX - rect.left
+            this.mouse.y = e.touches[0].clientY - rect.top
+          }
+        }
+
+        animate() {
+          const dpr = window.devicePixelRatio || 1
+          this.ctx.clearRect(
+            0,
+            0,
+            this.canvas.width / dpr,
+            this.canvas.height / dpr
+          )
+
+          this.updateDots()
+          this.drawDots()
+
+          this.animationFrameId = requestAnimationFrame(this.animate.bind(this))
+        }
+
+        updateDots() {
+          this.dots.forEach((dot) => {
+            const dx = this.mouse.x - dot.x
+            const dy = this.mouse.y - dot.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+
+            if (distance < this.radius) {
+              const normalizedDistance = distance / this.radius
+              const intensity = Math.pow(1 - normalizedDistance, 2.5)
+
+              dot.targetColor = this.pinkColor
+              dot.targetAlpha =
+                normalizedDistance < 0.3
+                  ? 0.5 + intensity * 0.3
+                  : 0.3 + intensity * 0.2
+            } else {
+              dot.targetColor = this.grayColor
+              dot.targetAlpha = dot.alpha
+            }
+
+            if (dot.color !== dot.targetColor) {
+              const currentRGB = this.hexToRgb(dot.color)
+              const targetRGB = this.hexToRgb(dot.targetColor)
+              const transitionSpeed =
+                dot.targetColor === this.pinkColor ? 0.15 : 0.05
+
+              currentRGB.r += (targetRGB.r - currentRGB.r) * transitionSpeed
+              currentRGB.g += (targetRGB.g - currentRGB.g) * transitionSpeed
+              currentRGB.b += (targetRGB.b - currentRGB.b) * transitionSpeed
+
+              dot.color = this.rgbToHex(
+                Math.round(currentRGB.r),
+                Math.round(currentRGB.g),
+                Math.round(currentRGB.b)
+              )
+            }
+          })
+        }
+
+        drawDots() {
+          this.dots.forEach((dot) => {
+            this.ctx.beginPath()
+            this.ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2)
+            this.ctx.fillStyle = dot.color
+            this.ctx.globalAlpha = dot.targetAlpha
+            this.ctx.fill()
+          })
+          this.ctx.globalAlpha = 1
+        }
+
+        hexToRgb(hex) {
+          const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
+          hex = hex.replace(
+            shorthandRegex,
+            (m, r, g, b) => r + r + g + g + b + b
+          )
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+          return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+              }
+            : { r: 0, g: 0, b: 0 }
+        }
+
+        rgbToHex(r, g, b) {
+          return `#${((1 << 24) + (r << 16) + (g << 8) + b)
+            .toString(16)
+            .slice(1)}`
+        }
+      }
+
+      // Arrancamos inmediatamente
+      new DotBackground()
+    })()
+  </script>
+</section>

@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+@theme {
+  --font-inter: 'Inter', Arial, Helvetica, sans-serif;
+  --font-limelight: 'Limelight', Arial, Helvetica, sans-serif;
+
+  --color-primary: #0a0a0a;
+  --color-secondary: #000000;
+}

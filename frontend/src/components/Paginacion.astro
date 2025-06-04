@@ -1,0 +1,36 @@
+---
+// src/components/Pagination.astro
+
+const { contestId, page, limit, sortBy, order, hasNextPage } = Astro.props as {
+  contestId: string
+  page: number
+  limit: number
+  sortBy: string
+  order: string
+  hasNextPage: boolean
+}
+---
+
+<nav class="mt-8 flex justify-center items-center gap-4 text-gray-300">
+  {
+    page > 1 && (
+      <a
+        href={`/contests/${contestId}?page=${page - 1}&limit=${limit}&sortBy=${sortBy}&order=${order}`}
+        class="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500 transition-colors duration-150"
+      >
+        ← Anterior
+      </a>
+    )
+  }
+  <span>Página {page}</span>
+  {
+    hasNextPage && (
+      <a
+        href={`/contests/${contestId}?page=${page + 1}&limit=${limit}&sortBy=${sortBy}&order=${order}`}
+        class="px-3 py-1 bg-indigo-600 rounded hover:bg-indigo-500 transition-colors duration-150"
+      >
+        Siguiente →
+      </a>
+    )
+  }
+</nav>

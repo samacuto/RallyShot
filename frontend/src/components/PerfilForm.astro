@@ -1,0 +1,123 @@
+---
+interface Props {
+  user: {
+    nombre: string
+    apellidos: string
+    email: string
+    display_name: string
+    pais: string
+    fecha_nacimiento: string
+  }
+}
+
+const { user } = Astro.props
+---
+
+<form id="editForm" class="space-y-4">
+  <label class="block text-sm text-gray-200 font-semibold">
+    Nombre
+    <input
+      type="text"
+      name="nombre"
+      value={user?.nombre}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200 font-semibold">
+    Apellidos
+    <input
+      type="text"
+      name="apellidos"
+      value={user?.apellidos}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200 font-semibold">
+    Email
+    <input
+      type="email"
+      name="email"
+      value={user?.email}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200 font-semibold">
+    Usuario
+    <input
+      type="text"
+      name="display_name"
+      value={user?.display_name}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200 font-semibold">
+    País
+    <input
+      type="text"
+      name="pais"
+      value={user?.pais}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200 font-semibold">
+    Fecha de nacimiento
+    <input
+      type="date"
+      name="fecha_nacimiento"
+      value={user?.fecha_nacimiento?.split('T')[0] ?? ''}
+      class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+    />
+  </label>
+
+  <label class="block text-sm text-gray-200">
+    <span class="mb-1 inline-block font-semibold">Foto de perfil</span>
+    <input
+      type="file"
+      name="foto_perfil"
+      accept="image/*"
+      class="block w-full text-sm
+           file:px-2 file:py-1.5 file:text-white file:bg-green-800
+           file:border file:border-green-600 file:rounded-md file:shadow
+           hover:file:opacity-90 hover:file:border-green-400
+           file:transition file:cursor-pointer"
+    />
+  </label>
+
+  <div class="flex justify-end gap-4 pt-2">
+    <button
+      type="button"
+      id="cancelEdit"
+      class="mt-6 inline-flex items-center gap-2 px-3 py-2 bg-gray-700 text-white text-sm border border-gray-500 rounded-md hover:opacity-85 hover:border-gray-400 transition shadow cursor-pointer"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="mt-6 inline-flex items-center gap-2 px-3 py-2 bg-blue-800 text-white text-sm border border-blue-500 rounded-md hover:opacity-85 hover:border-blue-400 transition shadow cursor-pointer"
+    >
+      <svg
+        id="save-spinner"
+        class="h-5 w-5 animate-spin hidden"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"
+        ></path>
+      </svg>
+      <span id="save-text">Guardar cambios</span>
+    </button>
+  </div>
+</form>

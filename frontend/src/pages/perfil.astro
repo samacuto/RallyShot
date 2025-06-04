@@ -1,0 +1,161 @@
+---
+import Layout from '@layouts/Layout.astro'
+import WarpBackground from '@components/WarpBackground.tsx'
+import PerfilCard from '@sections/PerfilCard.astro'
+import PerfilForm from '@components/PerfilForm.astro'
+
+const user = Astro.locals.user ?? null
+---
+
+<Layout user={user} title="Perfil | RallyShot">
+  <div
+    class="min-h-screen bg-zinc-900 flex flex-col items-center justify-start pt-24 pb-32"
+  >
+    <section class="relative w-full max-w-md">
+      <!-- Fondo animado detrás del card -->
+      <div
+        class="absolute -inset-x-8 -top-8 -bottom-8 z-0 rounded-2xl overflow-hidden border border-zinc-700"
+      >
+        <WarpBackground
+          color1="#0f172a"
+          color2="#1e3a8a"
+          color3="#6366f1"
+          speed={0.3}
+          swirl={2.0}
+          swirlIterations={10}
+          shapeScale={0.6}
+          client:load
+        />
+      </div>
+
+      <article
+        class="relative z-10 w-full max-w-md p-6 mt-8 bg-primary text-white rounded-2xl border border-gray-700 shadow-lg"
+      >
+        <div id="profile" class="mb-6">
+          {
+            user ? (
+              <PerfilCard user={user} />
+            ) : (
+              <p class="text-center text-gray-400 text-sm">
+                No hay sesión activa. Inicia sesión para ver tu perfil.
+              </p>
+            )
+          }
+        </div>
+
+        <div id="editForm" class="hidden">
+          <PerfilForm user={user} />
+        </div>
+
+        {
+          user && (
+            <div class="text-center mt-4">
+              <button
+                id="editButton"
+                class="px-4 py-2 text-xs font-medium text-white border-2 border-blue-800 bg-blue-600 rounded-md
+                     hover:border-blue-600 hover:bg-blue-500/30 cursor-pointer
+                     transition-colors duration-200 ease-in-out"
+              >
+                Editar perfil
+              </button>
+            </div>
+          )
+        }
+      </article>
+    </section>
+
+    <script is:inline>
+      // Referencias a elementos en el DOM
+      const profileDiv = document.getElementById('profile')
+      const editForm = document.getElementById('editForm')
+      const editButton = document.getElementById('editButton')
+      let currentUser = null
+
+      async function loadUserData() {
+        try {
+          const res = await fetch('/api/me', { credentials: 'same-origin' })
+          const data = await res.json()
+
+          if (!res.ok) throw new Error(data.error || 'No autorizado')
+
+          currentUser = data
+
+          // Rellenar inputs del formulario (excepto archivo)
+          Object.entries(currentUser).forEach(([key, value]) => {
+            const input = editForm.querySelector(`[name="${key}"]`)
+            if (input && value != null && input.type !== 'file') {
+              input.value = value
+            }
+          })
+        } catch (err) {
+          // Si falla la carga, muestra mensaje de error en la vista de perfil.
+          profileDiv.innerHTML = `<p class="text-center text-red-500 text-sm">Error: no se pudo cargar el perfil.</p>`
+        }
+      }
+
+      // Cargamos datos al iniciar, para rellenar el formulario (no hace falta para pintar el card).
+      loadUserData()
+
+      // Mostrar formulario de edición cuando se pulsa el botón
+      editButton?.addEventListener('click', () => {
+        profileDiv.classList.add('hidden')
+        editForm.classList.remove('hidden')
+        editButton.classList.add('hidden')
+      })
+
+      // Detectar clic en "Cancelar" (botón dentro de PerfilForm)
+      document.addEventListener('click', (e) => {
+        if (e.target?.id === 'cancelEdit') {
+          profileDiv.classList.remove('hidden')
+          editForm.classList.add('hidden')
+          editButton.classList.remove('hidden')
+        }
+      })
+
+      // Manejar envío del formulario de edición
+      document.addEventListener('submit', async (e) => {
+        if (e.target?.id !== 'editForm') return
+        e.preventDefault()
+
+        const raw = new FormData(e.target)
+        const formData = new FormData()
+
+        for (const [key, value] of raw.entries()) {
+          if (value instanceof File) {
+            if (value.size > 0) formData.append(key, value)
+          } else if (String(value).trim() !== '') {
+            formData.append(key, value.trim())
+          }
+        }
+
+        if (!Array.from(formData.keys()).length) {
+          alert('Debes modificar al menos un campo.')
+          return
+        }
+
+        const spinner = document.getElementById('save-spinner')
+        const saveText = document.getElementById('save-text')
+        spinner?.classList.remove('hidden')
+        saveText.textContent = 'Guardando...'
+
+        try {
+          const res = await fetch('/api/me', {
+            method: 'PATCH',
+            body: formData,
+          })
+          const data = await res.json()
+
+          if (!res.ok) throw new Error(data.error || 'Error al actualizar')
+
+          // Tras actualizar, recargamos la página para que PerfilCard se renderice con datos nuevos:
+          location.reload()
+        } catch (err) {
+          alert(err.message ?? 'Error al actualizar el perfil')
+        } finally {
+          spinner?.classList.add('hidden')
+          saveText.textContent = 'Guardar cambios'
+        }
+      })
+    </script>
+  </div>
+</Layout>

@@ -1,0 +1,50 @@
+---
+import ConcursoCard from '@components/ConcursoCard.astro'
+import type { Concurso } from '../lib/types/types'
+
+// Esquemas de color
+const schemes = [
+  {
+    color1: '#ff416c',
+    color2: '#ff4b2b',
+    color3: '#f9d423',
+    speed: 0.3,
+    swirl: 1.5,
+    swirlIterations: 8,
+    shapeScale: 0.7,
+  },
+  {
+    color1: '#00c6ff',
+    color2: '#0072ff',
+    color3: '#00f260',
+    speed: 0.4,
+    swirl: 2.0,
+    swirlIterations: 12,
+    shapeScale: 0.5,
+  },
+  {
+    color1: '#833ab4',
+    color2: '#fd1d1d',
+    color3: '#fcb045',
+    speed: 0.2,
+    swirl: 1.8,
+    swirlIterations: 10,
+    shapeScale: 0.6,
+  },
+]
+
+const { concursos } = Astro.props
+---
+
+<section class="bg-primary py-16 px-4 max-w-7xl mx-auto z-10">
+  <h2 class="text-3xl text-white font-bold mb-8 text-center">Concursos</h2>
+
+  <article class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {
+      concursos.map((concurso: Concurso, index: number) => {
+        const scheme = schemes[index % schemes.length]
+        return <ConcursoCard concurso={concurso} scheme={scheme} />
+      })
+    }
+  </article>
+</section>

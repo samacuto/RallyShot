@@ -1,0 +1,58 @@
+---
+const { foto, opened = false, index = 0 } = Astro.props
+const placeholder = 'https://via.placeholder.com/600x400?text=Sin+Imagen'
+
+// Calcula el desplazamiento y rotación según el índice
+const lefts = ['10px', '10%', '20%', '30%', '40%']
+const left = lefts[index] || `${index * 10}%`
+const rotation = opened ? 'rotate(0deg)' : 'rotate(-2deg)'
+---
+
+<div
+  class={`portfolio${opened ? ' opened' : ''}`}
+  style={`left: ${opened ? '0' : left}; transform: ${rotation}; max-width: 400px; z-index: ${opened ? 1000 : 1};`}
+>
+  <img
+    src={foto.url || placeholder}
+    alt={foto.titulo}
+    class="w-full object-cover"
+    onerror="this.onerror=null;this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'"
+  />
+  <span class="txt block bg-gray-100 px-4 py-2 text-sm">{foto.titulo}</span>
+  <div
+    class="ombra absolute bottom-5 left-2 w-[90%] h-5"
+    style={`display: ${opened ? 'block' : 'none'};`}
+  >
+  </div>
+</div>
+
+<style>
+  .portfolio {
+    position: absolute;
+    transition: 0.2s;
+    box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+  }
+  .portfolio.opened {
+    z-index: 1000;
+    left: 0 !important;
+    transform: rotate(0deg) !important;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    width: 100% !important;
+    max-width: 1140px !important;
+  }
+  .ombra {
+    box-shadow: 0 15px 10px rgba(0, 0, 0, 0.7);
+    transform: rotate(-2deg);
+    z-index: -1;
+    border-radius: 9999px;
+  }
+  .txt {
+    margin-top: -2px;
+    padding-top: 20px;
+    width: 98%;
+    padding-left: 2%;
+    height: 33px;
+    background: #f7f7f7;
+  }
+</style>

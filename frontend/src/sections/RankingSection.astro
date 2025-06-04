@@ -1,0 +1,139 @@
+---
+import FotoDestacada from '@components/FotoDestacada.astro'
+import type { Foto } from '../lib/types/types'
+
+const { fotosDestacadas = [] } = Astro.props
+const hayFotos = Array.isArray(fotosDestacadas) && fotosDestacadas.length > 0
+
+let openedIndex = -1
+
+function handleOpen(index) {
+  openedIndex = openedIndex === index ? -1 : index
+}
+---
+
+{
+  hayFotos && (
+    <section class="py-16 px-4 bg-gray-100">
+      <div class="max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">Fotos Destacadas</h2>
+        <div
+          id="portfolio-gallery"
+          class="relative w-full h-[500px] max-w-[1140px] mx-auto"
+          style="min-height: 400px;"
+        >
+          {fotosDestacadas.map((foto, i) => (
+            <FotoDestacada
+              foto={foto}
+              index={i}
+              opened={false}
+              data-index={i}
+            />
+          ))}
+        </div>
+        <div id="portfolio-navi" class="flex justify-center gap-2 mt-8">
+          {fotosDestacadas.map((_, i) => (
+            <button
+              type="button"
+              class="circle w-5 h-5 rounded-full border border-gray-700 bg-gray-200 hover:bg-gray-400 transition-colors"
+              data-index={i}
+              aria-label={`Seleccionar foto ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    const gallery = document.getElementById('portfolio-gallery')
+    const navi = document.getElementById('portfolio-navi')
+    if (!gallery) return
+    const items = gallery.querySelectorAll('.portfolio')
+    const circles = navi ? navi.querySelectorAll('.circle') : []
+    items.forEach((item, idx) => {
+      item.addEventListener('click', function (e) {
+        e.stopPropagation()
+        const isOpened = item.classList.contains('opened')
+        items.forEach((el) => {
+          el.classList.remove('opened')
+          el.style.display = ''
+        })
+        if (!isOpened) {
+          item.classList.add('opened')
+          items.forEach((el) => {
+            if (el !== item) el.style.display = 'none'
+          })
+          if (circles[idx]) {
+            circles.forEach((c) => c.classList.remove('activenav'))
+            circles[idx].classList.add('activenav')
+          }
+        } else {
+          if (circles[idx]) circles[idx].classList.remove('activenav')
+        }
+      })
+    })
+    // Botones de navegación
+    circles.forEach((circle, idx) => {
+      circle.addEventListener('click', function (e) {
+        e.stopPropagation()
+        items.forEach((el, i) => {
+          el.classList.remove('opened')
+          el.style.display = ''
+          circles[i].classList.remove('activenav')
+        })
+        items[idx].classList.add('opened')
+        circles[idx].classList.add('activenav')
+        items.forEach((el, i) => {
+          if (i !== idx) el.style.display = 'none'
+        })
+      })
+    })
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function (e) {
+      if (!gallery.contains(e.target) && (!navi || !navi.contains(e.target))) {
+        items.forEach((el, i) => {
+          el.classList.remove('opened')
+          el.style.display = ''
+          if (circles[i]) circles[i].classList.remove('activenav')
+        })
+      }
+    })
+  })
+</script>
+
+<style>
+  .portfolio {
+    position: absolute;
+    transition: 0.2s;
+    box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+  }
+  .portfolio.opened {
+    z-index: 1000;
+    left: 0 !important;
+    transform: rotate(0deg) !important;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    width: 100% !important;
+    max-width: 1140px !important;
+  }
+  .circle {
+    display: inline-block;
+    cursor: pointer;
+    border: 1px solid #333;
+    background: #efefef;
+    margin-right: 6px;
+    transition:
+      background 0.3s,
+      border 0.3s;
+  }
+  .circle:last-child {
+    margin-right: 0;
+  }
+  .circle.activenav {
+    background: #666;
+    border: 1px solid #333;
+  }
+</style>

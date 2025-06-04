@@ -1,0 +1,87 @@
+---
+import Layout from '@layouts/Layout.astro'
+export const prerender = false
+
+const url = new URL(Astro.request.url)
+const userId = url.searchParams.get('userId') || ''
+const codigo = url.searchParams.get('codigo') || ''
+---
+
+<Layout>
+  <section class="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
+    <h1 class="text-xl font-bold mb-4 text-center">Cambiar contraseña</h1>
+
+    <form id="changeForm" class="space-y-4">
+      <input
+        required
+        name="userId"
+        id="userId"
+        placeholder="ID de usuario"
+        class="input"
+        value={userId}
+      />
+      <input
+        required
+        name="codigo"
+        id="codigo"
+        placeholder="Código de verificación"
+        class="input"
+        value={codigo}
+      />
+      <input
+        required
+        name="nueva_password"
+        type="password"
+        placeholder="Nueva contraseña"
+        class="input"
+      />
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded">
+        Cambiar contraseña
+      </button>
+    </form>
+
+    <p id="message" class="mt-4 text-center text-sm"></p>
+  </section>
+
+  <script type="module">
+    const form = document.getElementById('changeForm')
+    const message = document.getElementById('message')
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const data = Object.fromEntries(new FormData(form).entries())
+
+      try {
+        const res = await fetch('/api/cambiar-contrasena', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+
+        const result = await res.json()
+        if (res.ok) {
+          message.textContent = '✅ Contraseña cambiada correctamente.'
+          message.className = 'text-green-600 text-center'
+          setTimeout(() => (window.location.href = '/login'), 3000)
+        } else {
+          message.textContent =
+            '❌ ' + (result.error || 'Error al cambiar la contraseña.')
+          message.className = 'text-red-600 text-center'
+        }
+      } catch (err) {
+        console.error('❌ Error en el frontend:', err)
+        message.textContent = '❌ Error inesperado. Intenta más tarde.'
+        message.className = 'text-red-600 text-center'
+      }
+    })
+  </script>
+
+  <style>
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+    }
+  </style>
+</Layout>

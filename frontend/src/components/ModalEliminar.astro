@@ -1,0 +1,88 @@
+<div
+  id="modal-eliminar"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+>
+  <div
+    class="bg-zinc-800 rounded-lg p-6 max-w-sm w-full shadow-2xl text-center border border-zinc-600 text-white"
+  >
+    <h3
+      id="modal-texto-eliminar"
+      class="text-lg mb-6 font-semibold text-gray-200"
+    >
+      ¿Estás seguro de que quieres eliminar esta entidad?
+    </h3>
+    <div class="flex justify-center gap-4">
+      <button
+        id="btn-cancelar"
+        class="inline-flex items-center gap-2 px-3 py-2 bg-gray-700 text-white text-sm border border-gray-500 rounded-md hover:opacity-85 hover:border-gray-400 transition shadow cursor-pointer"
+      >
+        Cancelar
+      </button>
+
+      <button
+        id="btn-confirmar"
+        class="inline-flex items-center gap-2 px-3 py-2 bg-red-800 text-white text-sm border border-red-500 rounded-md hover:opacity-85 hover:border-red-400 transition shadow cursor-pointer"
+      >
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  let entidadIdAEliminar = null
+  let endpointEliminar = ''
+  let tipoEntidad = ''
+
+  window.eliminarEntidad = function (id, tipo, endpoint, nombre = '') {
+    entidadIdAEliminar = id
+    endpointEliminar = endpoint
+    tipoEntidad = tipo
+
+    const modal = document.getElementById('modal-eliminar')
+    const texto = document.getElementById('modal-texto-eliminar')
+
+    if (texto) {
+      texto.textContent = `¿Estás seguro de que quieres eliminar ${tipo} "${nombre}"?`
+    }
+
+    modal?.classList.remove('hidden')
+  }
+
+  addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modal-eliminar')
+    const btnCancelar = document.getElementById('btn-cancelar')
+    const btnConfirmar = document.getElementById('btn-confirmar')
+
+    if (!modal || !btnCancelar || !btnConfirmar) return
+
+    btnCancelar.addEventListener('click', () => {
+      modal.classList.add('hidden')
+      entidadIdAEliminar = null
+    })
+
+    btnConfirmar.addEventListener('click', async () => {
+      if (!entidadIdAEliminar || !endpointEliminar) return
+
+      try {
+        const res = await fetch(`${endpointEliminar}${entidadIdAEliminar}`, {
+          method: 'DELETE',
+        })
+
+        if (res.ok) {
+          alert(`${tipoEntidad} ha sido eliminado correctamente`)
+          window.location.reload()
+        } else {
+          const error = await res.json()
+          alert(`Error al eliminar: ${error?.error || 'Error desconocido'}`)
+        }
+      } catch (err) {
+        alert(`Error de conexión: ${err.message}`)
+        console.error(err)
+      } finally {
+        modal.classList.add('hidden')
+        entidadIdAEliminar = null
+      }
+    })
+  })
+</script>

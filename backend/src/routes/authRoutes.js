@@ -8,11 +8,16 @@ import {
   updateUserSchema,
   requestChangePasswordSchema,
   confirmChangePasswordSchema,
+  verifyAccountSchema,
+  forgottenPasswordSchema,
 } from '../schemas/authSchema.js'
 import { requireAuth } from '../middlewares/requireAuth.js'
+import { requireAdmin } from '../middlewares/requireAdmin.js'
 import { verifyToken } from '../middlewares/verifyToken.js'
 
 const router = express.Router()
+
+router.get('/', verifyToken, requireAdmin, AuthController.getAll)
 
 router.post(
   '/register',
@@ -20,9 +25,15 @@ router.post(
   validate(authRegisterSchema),
   AuthController.register
 )
+
 router.post('/login', validate(authLoginSchema), AuthController.login)
-router.post('/verify-account', AuthController.verifyAccount)
+router.post(
+  '/verify-account',
+  validate(verifyAccountSchema),
+  AuthController.verifyAccount
+)
 router.delete('/me', verifyToken, requireAuth, AuthController.delete)
+
 router.patch(
   '/me',
   verifyToken,
@@ -31,6 +42,7 @@ router.patch(
   validate(updateUserSchema),
   AuthController.update
 )
+
 router.post(
   '/request-change-password',
   verifyToken,
@@ -45,6 +57,25 @@ router.post(
   AuthController.confirmPasswordChange
 )
 
-router.post('/forgotten-password', AuthController.forgottenPassword)
+router.post(
+  '/forgotten-password',
+  validate(forgottenPasswordSchema),
+  AuthController.forgottenPassword
+)
+
+router.get('/me', verifyToken, requireAuth, AuthController.getCurrentUser)
+
+router.patch(
+  '/:id',
+  verifyToken,
+  requireAdmin,
+  upload.single('foto_perfil'),
+  validate(updateUserSchema),
+  AuthController.updateById
+)
+
+router.delete('/:id', verifyToken, requireAdmin, AuthController.deleteById)
+
+router.get('/:id', verifyToken, requireAdmin, AuthController.getById)
 
 export default router

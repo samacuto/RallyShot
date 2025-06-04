@@ -1,0 +1,114 @@
+---
+import {
+  Pencil,
+  Trash,
+  Calendar,
+  UploadCloud,
+  Vote,
+  Ban,
+  ImagePlus,
+} from '@lucide/astro'
+import type { Concurso } from '@lib/types/types'
+
+interface Props {
+  concurso: Concurso
+}
+
+const { concurso } = Astro.props
+
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+
+const isFinalizado = new Date(concurso.fecha_fin_votacion) < new Date()
+---
+
+<article
+  class="bg-zinc-900 text-white border border-zinc-600 rounded-xl p-5 shadow relative p-8"
+  aria-labelledby={`concurso-${concurso.id}-title`}
+>
+  <span
+    class={`inline-block text-xs font-bold px-2 py-1 rounded mb-3 ${
+      isFinalizado
+        ? 'bg-red-800 text-red-300 border border-red-600'
+        : 'bg-green-800 text-green-300 border border-green-600'
+    }`}
+  >
+    {isFinalizado ? 'Finalizado' : 'Activo'}
+  </span>
+
+  <h3
+    id={`concurso-${concurso.id}-title`}
+    class="text-3xl font-limelight font-bold text-gray-200"
+  >
+    {concurso.titulo}
+  </h3>
+
+  <p class="text-base font-semibold text-gray-400 mb-2">
+    {concurso.descripcion}
+  </p>
+  <ul class="text-xs text-gray-400 space-y-1 mb-2">
+    <!-- Lista de fechas -->
+    <li class="flex items-center gap-2">
+      <Calendar class="w-4 h-4 text-gray-50" />
+      <span>Inicio: <strong>{formatDate(concurso.fecha_inicio)}</strong></span>
+    </li>
+    <li class="flex items-center gap-2">
+      <UploadCloud class="w-4 h-4 text-gray-50" />
+      <span>
+        Fin de subida: <strong>{formatDate(concurso.fecha_fin_subida)}</strong>
+      </span>
+    </li>
+    <li class="flex items-center gap-2">
+      <Vote class="w-4 h-4 text-gray-50" />
+      <span>
+        Inicio votación: <strong
+          >{formatDate(concurso.fecha_inicio_votacion)}</strong
+        >
+      </span>
+    </li>
+    <li class="flex items-center gap-2">
+      <Ban class="w-4 h-4 text-gray-50" />
+      <span>
+        Fin votación: <strong>{formatDate(concurso.fecha_fin_votacion)}</strong>
+      </span>
+    </li>
+    <li class="flex items-center gap-2">
+      <ImagePlus class="w-4 h-4 text-gray-50" />
+      <span>
+        Máx. fotos por participante:
+        <strong>{concurso.max_fotos_participante}</strong>
+      </span>
+    </li>
+  </ul>
+
+  <!-- Botones de acción -->
+  <nav
+    class="absolute top-4 right-4 flex gap-4"
+    aria-label="Acciones del concurso"
+  >
+    <a
+      href={`/admin/modificar-concurso/${concurso.id}`}
+      title="Editar concurso"
+      class="group bg-blue-900 text-blue-400 hover:text-blue-300 hover:bg-blue-800 transition duration-200 ease-in-out cursor-pointer p-2 rounded-md shadow border border-blue-500/30 hover:border-blue-400"
+    >
+      <Pencil
+        class="w-5 h-5 transform transition-transform duration-200 ease-in-out group-hover:scale-110"
+      />
+    </a>
+
+    <button
+      type="button"
+      title="Eliminar concurso"
+      class="group bg-red-500/20 text-red-500 hover:text-red-400 hover:bg-red-800 transition duration-200 ease-in-out cursor-pointer p-2 rounded-md shadow border border-red-500/30 hover:border-red-400"
+      onclick={`window.eliminarEntidad('${concurso.id}', 'el concurso', '/api/concursos/eliminar-concurso?id=', '${concurso.titulo}')`}
+    >
+      <Trash
+        class="w-5 h-5 transform transition-transform duration-200 ease-in-out group-hover:scale-110"
+      />
+    </button>
+  </nav>
+</article>

@@ -1,0 +1,95 @@
+---
+import { Pencil, Trash, Mail, User, Globe, CalendarMinus2 } from '@lucide/astro'
+import type { Usuario } from '@lib/types/types'
+
+interface Props {
+  usuario: Usuario
+}
+
+const { usuario } = Astro.props
+---
+
+<article
+  class="bg-zinc-900 text-white border border-zinc-600 rounded-xl shadow relative p-6"
+  aria-labelledby={`usuario-${usuario.id}-title`}
+>
+  <div class="flex items-center space-x-4 mb-4">
+    {
+      usuario.foto_perfil && (
+        <img
+          src={usuario.foto_perfil}
+          alt="Foto de perfil"
+          class="w-16 h-16 rounded-full border border-zinc-500"
+        />
+      )
+    }
+
+    <h3
+      id={`usuario-${usuario.id}-title`}
+      class="text-2xl font-semibold text-gray-100"
+    >
+      {usuario.nombre}
+      {usuario.apellidos}
+    </h3>
+  </div>
+
+  <p class="text-sm text-gray-400 mb-3">
+    <span class="text-gray-200">Nombre de usuario: </span>
+    <strong>{usuario.display_name}</strong>
+  </p>
+
+  <ul class="text-xs text-gray-400 space-y-1 mb-2">
+    <li class="flex items-center gap-2">
+      <Mail class="w-4 h-4 text-gray-300" />
+      <span>Correo electrónico: </span>
+      <strong>{usuario.email}</strong>
+    </li>
+    <li class="flex items-center gap-2">
+      <User class="w-4 h-4 text-gray-300" />
+      <span>Rol: </span>
+      <strong>{usuario.rol}</strong>
+    </li>
+    <li class="flex items-center gap-2">
+      <Globe class="w-4 h-4 text-gray-300" />
+      <span>País: </span>
+      <strong>{usuario.pais}</strong>
+    </li>
+    <li class="flex items-center gap-2">
+      <CalendarMinus2 class="w-4 h-4 text-gray-300" />
+      <span>Fecha de nacimiento:</span>
+      <strong>
+        {
+          usuario.fecha_nacimiento
+            ? new Date(usuario.fecha_nacimiento).toLocaleDateString()
+            : '—'
+        }</strong
+      >
+    </li>
+  </ul>
+
+  <nav
+    class="absolute top-4 right-4 flex gap-4"
+    aria-label="Acciones del administrador sobre el usuario"
+  >
+    <a
+      href={`/admin/modificar-usuario/${usuario.id}`}
+      title="Editar usuario"
+      class="group bg-blue-900 text-blue-400 hover:text-blue-300 hover:bg-blue-800 transition duration-200 ease-in-out cursor-pointer p-2 rounded-md shadow border border-blue-500/30 hover:border-blue-400"
+    >
+      <Pencil
+        class="w-5 h-5 transform transition-transform duration-200 ease-in-out group-hover:scale-110"
+      />
+    </a>
+
+    <button
+      type="button"
+      title="Eliminar usuario"
+      class="group bg-red-500/20 text-red-500 hover:text-red-400 hover:bg-red-800 transition duration-200 ease-in-out cursor-pointer p-2 rounded-md shadow border border-red-500/30 hover:border-red-400"
+      onclick={`window.eliminarEntidad('${usuario.id}', 'el usuario', '/api/usuarios/', '${usuario.display_name}')`}
+    >
+      <Trash
+        class="w-5 h-5 transform transition-transform duration-200 ease-in-out group-hover:scale-110"
+      />
+    </button>
+  </nav>
+</article>

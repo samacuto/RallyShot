@@ -1,0 +1,156 @@
+---
+import Layout from '@layouts/Layout.astro'
+import WarpBackground from '@components/WarpBackground.tsx'
+import { AlertTriangle } from '@lucide/astro'
+
+const user = Astro.locals.user ?? null
+const error = Astro.url.searchParams.get('error') ?? null
+---
+
+<Layout user={user} title="Crear Concurso | RallyShot">
+  <main
+    class="min-h-screen bg-zinc-900 flex flex-col items-center justify-start pt-24"
+  >
+    <div class="relative w-full max-w-3xl px-4 mb-24">
+      <!-- Fondo animado -->
+      <div
+        class="absolute -inset-x-8 -top-8 -bottom-8 z-0 rounded-2xl overflow-hidden border border-zinc-700"
+      >
+        <WarpBackground
+          color1="#1e1b4b"
+          color2="#4338ca"
+          color3="#8b5cf6"
+          speed={0.4}
+          swirl={3}
+          swirlIterations={10}
+          shapeScale={0.6}
+          client:load
+        />
+      </div>
+
+      <!-- Formulario -->
+      <article
+        class="relative z-10 w-full p-6 mt-8 bg-zinc-800 rounded-2xl border border-zinc-700 shadow-lg"
+      >
+        <header class="mb-8 border-b border-zinc-700 pb-4 text-center">
+          <h1 class="text-2xl font-bold text-gray-100 tracking-wide">
+            Crear Concurso
+          </h1>
+        </header>
+
+        {
+          error && (
+            <p class="text-red-400 text-sm text-center">
+              {decodeURIComponent(error)}
+            </p>
+          )
+        }
+
+        <form
+          method="POST"
+          action="/api/concursos/crear-concurso"
+          class="space-y-5 text-sm text-gray-300"
+        >
+          <label class="block">
+            <span class="block font-medium mb-1">Título</span>
+            <input
+              id="nombre"
+              name="nombre"
+              required
+              class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Ej. Naturaleza Viva"
+            />
+          </label>
+
+          <label class="block">
+            <span class="block font-medium mb-1">Descripción</span>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              required
+              class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Describe el objetivo del concurso"></textarea>
+          </label>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="block">
+              <span class="block font-medium mb-1">Fecha de inicio</span>
+              <input
+                type="date"
+                id="fecha_inicio"
+                name="fecha_inicio"
+                required
+                class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-medium mb-1">Fecha límite de subida</span>
+              <input
+                type="date"
+                id="fecha_fin_subida"
+                name="fecha_fin_subida"
+                required
+                class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-medium mb-1">Inicio de votación</span>
+              <input
+                type="date"
+                id="fecha_inicio_votacion"
+                name="fecha_inicio_votacion"
+                required
+                class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-medium mb-1">Fin de votación</span>
+              <input
+                type="date"
+                id="fecha_fin_votacion"
+                name="fecha_fin_votacion"
+                required
+                class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </label>
+
+            <p
+              class="flex items-center gap-2 text-sm text-gray-400 mb-2 md:col-span-2"
+            >
+              <AlertTriangle class="w-4 h-4 text-gray-50" />
+              Recuerda que el periodo de votación debe transcurrir después de la
+              fecha de subida.
+            </p>
+
+            <label class="block md:col-span-2">
+              <span class="block font-medium mb-1"
+                >Máx. fotos por participante</span
+              >
+              <input
+                type="number"
+                id="max_fotos_participante"
+                name="max_fotos_participante"
+                min="1"
+                required
+                class="w-full rounded-md bg-zinc-900 border border-zinc-600 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Ej. 5"
+              />
+            </label>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-green-800 text-white text-sm border border-green-500 rounded-md hover:opacity-85 hover:border-green-400 transition shadow cursor-pointer"
+            >
+              Crear concurso
+            </button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </main>
+</Layout>

@@ -7,10 +7,25 @@ class Concurso {
   static async getAll() {
     const { data, error } = await supabase
       .from('concursos')
-      .select('*')
+      .select(
+        `
+      id,
+      nombre,
+      descripcion,
+      fecha_inicio,
+      fecha_fin_subida,
+      fecha_inicio_votacion,
+      fecha_fin_votacion,
+      max_fotos_participante
+    `
+      )
       .order('fecha_inicio', { ascending: false })
 
-    if (error) throw new Error('Error al consultar los concursos')
+    if (error) {
+      console.error('❌ Supabase error:', error)
+      throw new Error('Error al consultar los concursos')
+    }
+
     return data
   }
 
@@ -20,7 +35,11 @@ class Concurso {
       .insert([{ ...data, creado_por: creadoPor }])
       .select('id')
 
-    if (error) throw new Error(error.message)
+    if (error) {
+      console.error('❌ Error desde Supabase:', error)
+      throw new Error(error.message)
+    }
+
     return insertado[0].id
   }
 
@@ -103,6 +122,42 @@ class Concurso {
       ])
 
     if (insertError) throw new Error(insertError.message)
+  }
+
+  static async delete(id) {
+    const { error } = await adminClient.from('concursos').delete().eq('id', id)
+
+    if (error) {
+      console.error('❌ Error al eliminar concurso:', error)
+      throw new Error('No se pudo eliminar el concurso')
+    }
+  }
+
+  static async update(id, data) {
+    const { error } = await adminClient
+      .from('concursos')
+      .update(data)
+      .eq('id', id)
+
+    if (error) {
+      console.error('❌ Error al modificar concurso:', error)
+      throw new Error('No se pudo modificar el concurso')
+    }
+  }
+
+  static async getById(id) {
+    const { data, error } = await adminClient
+      .from('concursos')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error || !data) {
+      console.error('❌ Error al obtener concurso:', error)
+      throw new Error('Concurso no encontrado')
+    }
+
+    return data
   }
 }
 

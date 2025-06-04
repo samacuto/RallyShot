@@ -1,0 +1,124 @@
+---
+import Layout from '@layouts/Layout.astro'
+import { fetchUsuarioId } from '@lib/fetchUsuarioId'
+import type { Usuario } from '@lib/types/types'
+
+const { params, request } = Astro
+const id = params.id
+const cookies = request.headers.get('cookie') ?? ''
+const usuario: Usuario | null = await fetchUsuarioId(id, cookies)
+
+const user = Astro.locals.user ?? null
+---
+
+<Layout user={user} title="Modificar usuario | RallyShot">
+  <main
+    class="min-h-screen bg-zinc-900 flex flex-col items-center justify-start pt-24 px-4"
+  >
+    <section
+      class="w-full max-w-xl bg-zinc-800 rounded-2xl border border-zinc-700 p-6 shadow-lg"
+    >
+      <h1 class="text-2xl font-bold text-white mb-6 text-center">
+        Modificar usuario
+      </h1>
+
+      {
+        usuario ? (
+          <form
+            method="POST"
+            action={`/api/usuarios/${usuario.id}`}
+            enctype="multipart/form-data"
+            class="space-y-5 text-white"
+          >
+            <input type="hidden" name="id" value={usuario.id} />
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">Nombre:</span>
+              <input
+                type="text"
+                name="nombre"
+                value={usuario.nombre}
+                required
+                class="w-full rounded bg-zinc-700 p-2 border border-zinc-600"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">Apellidos:</span>
+              <input
+                type="text"
+                name="apellidos"
+                value={usuario.apellidos}
+                required
+                class="w-full rounded bg-zinc-700 p-2 border border-zinc-600"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">
+                Nombre de usuario:
+              </span>
+              <input
+                type="text"
+                name="display_name"
+                value={usuario.display_name}
+                class="w-full rounded bg-zinc-700 p-2 border border-zinc-600"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">País:</span>
+              <input
+                type="text"
+                name="pais"
+                value={usuario.pais}
+                class="w-full rounded bg-zinc-700 p-2 border border-zinc-600"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">
+                Fecha de nacimiento:
+              </span>
+              <input
+                type="date"
+                name="fecha_nacimiento"
+                value={usuario.fecha_nacimiento?.split('T')[0] || ''}
+                class="w-full rounded bg-zinc-700 p-2 border border-zinc-600"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block text-sm font-medium mb-1">
+                Foto de perfil:
+              </span>
+              <input
+                type="file"
+                name="foto_perfil"
+                accept="image/*"
+                class="w-full text-sm text-gray-300"
+              />
+            </label>
+
+            <div class="flex justify-end gap-4 pt-4">
+              <a
+                href="/admin/panel"
+                class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white"
+              >
+                Cancelar
+              </a>
+              <button
+                type="submit"
+                class="px-4 py-2 rounded bg-green-700 hover:bg-green-600 text-white"
+              >
+                Guardar
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p class="text-red-400 text-center">Usuario no encontrado.</p>
+        )
+      }
+    </section>
+  </main>
+</Layout>

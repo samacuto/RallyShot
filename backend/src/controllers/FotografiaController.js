@@ -124,6 +124,16 @@ class FotografiaController {
       res.status(400).json({ error: error.message })
     }
   }
+
+  static async getRankingGlobal(req, res) {
+    try {
+      const fotos = await Fotografia.getRankingGlobal()
+      res.status(200).json(fotos)
+    } catch (error) {
+      console.error('Error al obtener ranking global:', error)
+      res.status(500).json({ error: 'No se pudo obtener el ranking global' })
+    }
+  }
 }
 
 export default FotografiaController

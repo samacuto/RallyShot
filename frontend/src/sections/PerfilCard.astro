@@ -1,0 +1,64 @@
+---
+import { Mail, Globe, Calendar } from '@lucide/astro'
+
+interface Props {
+  user: {
+    nombre: string
+    apellidos: string
+    display_name: string
+    email: string
+    pais: string
+    fecha_nacimiento: string
+    foto_perfil: string
+  }
+}
+
+const { user } = Astro.props
+---
+
+<section
+  class="bg-primary rounded-2xl p-6 shadow-md border border-zinc-700 text-sm text-gray-200 space-y-6"
+>
+  <figure class="flex flex-col items-center gap-3">
+    <img
+      src={`${user.foto_perfil}?t=${Date.now()}`}
+      alt="Foto de perfil"
+      class="w-28 h-28 rounded-full object-cover border-2 border-gray-500 shadow-lg"
+    />
+    <figcaption class="text-center">
+      <h2 class="text-lg font-semibold text-white">
+        {user.nombre}
+        {user.apellidos}
+      </h2>
+      <p class="text-sm text-gray-400">{user.display_name}</p>
+    </figcaption>
+  </figure>
+
+  <hr class="border-gray-700" />
+
+  <ul class="space-y-2">
+    <li class="flex items-center gap-3">
+      <Mail class="w-5 h-5 text-white" />
+      <span class="flex-1 text-gray-300">Email:</span>
+      <span class="text-right">{user.email}</span>
+    </li>
+
+    <li class="flex items-center gap-3">
+      <Globe class="w-5 h-5 text-white" />
+      <span class="flex-1 text-gray-300">País:</span>
+      <span class="text-right">{user.pais || '—'}</span>
+    </li>
+
+    <li class="flex items-center gap-3">
+      <Calendar class="w-5 h-5 text-white" />
+      <span class="flex-1 text-gray-300">Fecha de nacimiento:</span>
+      <span class="text-right">
+        {
+          user.fecha_nacimiento
+            ? new Date(user.fecha_nacimiento).toLocaleDateString()
+            : '—'
+        }
+      </span>
+    </li>
+  </ul>
+</section>

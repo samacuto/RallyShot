@@ -173,10 +173,69 @@ class AuthController {
       res.status(200).json({
         message:
           'Se ha enviado un email con el código para cambiar la contraseña',
+        userId,
+        codigo: result.codigo,
       })
     } catch (error) {
       console.error('Error en olvide-password:', error)
       res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async getCurrentUser(req, res) {
+    try {
+      const result = await Auth.getCurrentUser(req.user.id)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error)
+      res.status(404).json({ error: error.message })
+    }
+  }
+
+  static async getAll(req, res) {
+    try {
+      const usuarios = await Auth.getAll()
+      res.status(200).json(usuarios)
+    } catch (error) {
+      console.error('Error en getAll:', error)
+      res.status(500).json({ error: error.message })
+    }
+  }
+
+  static async updateById(req, res) {
+    try {
+      const userId = req.params.id
+      const data = {
+        ...req.validatedData,
+        foto_perfil: req.file || null,
+      }
+      const result = await Auth.updateById(userId, data)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error en updateById:', error)
+      res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async deleteById(req, res) {
+    try {
+      const userId = req.params.id
+      const result = await Auth.deleteById(userId)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error en deleteById:', error)
+      res.status(400).json({ error: error.message })
+    }
+  }
+
+  static async getById(req, res) {
+    try {
+      const userId = req.params.id
+      const result = await Auth.getById(userId)
+      res.status(200).json(result)
+    } catch (error) {
+      console.error('Error en getById:', error)
+      res.status(404).json({ error: error.message })
     }
   }
 }

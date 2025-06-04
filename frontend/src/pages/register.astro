@@ -1,0 +1,55 @@
+---
+import Layout from '@layouts/Layout.astro'
+export const prerender = false
+---
+
+<Layout>
+  <section class="max-w-lg mx-auto mt-16 p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4 text-center">Registro</h1>
+    <form
+      method="POST"
+      action="/api/register"
+      enctype="multipart/form-data"
+      class="space-y-4"
+    >
+      <input
+        required
+        name="email"
+        type="email"
+        placeholder="Correo electrónico"
+        class="input"
+      />
+      <input
+        required
+        name="password"
+        type="password"
+        placeholder="Contraseña"
+        class="input"
+      />
+      <input required name="nombre" placeholder="Nombre" class="input" />
+      <input required name="apellidos" placeholder="Apellidos" class="input" />
+      <input required name="fecha_nacimiento" type="date" class="input" />
+      <input required name="pais" placeholder="País" class="input" />
+      <input
+        required
+        name="display_name"
+        placeholder="Nombre de usuario"
+        class="input"
+      />
+      <input name="foto_perfil" type="file" accept="image/*" class="input" />
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded"
+        >Registrarse</button
+      >
+    </form>
+  </section>
+
+  <style>
+    .input {
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+    }
+  </style>
+</Layout>

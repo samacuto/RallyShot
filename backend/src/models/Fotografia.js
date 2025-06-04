@@ -132,6 +132,51 @@ class Fotografia {
       votos: undefined, // eliminamos el array de ids si no quieres exponerlo
     }))
   }
+
+  // models/Fotografia.js
+
+  static async getRankingGlobal() {
+    const { data, error } = await adminClient
+      .from('fotografias')
+      .select(
+        `
+      id,
+      titulo,
+      url_imagen,
+      concurso:concurso_id (
+        id,
+        nombre
+      )
+    `
+      )
+      .eq('estado', 'admitida')
+
+    if (error) {
+      throw new Error('Error al obtener ranking global')
+    }
+
+    // Obtener todos los votos agrupados por foto
+    const { data: votosData, error: votosError } = await adminClient
+      .from('votos')
+      .select('fotografia_id')
+
+    if (votosError) {
+      console.error('[getRankingGlobal] Supabase votos error:', votosError)
+      throw new Error('Error al contar votos')
+    }
+
+    const conteoVotos = votosData.reduce((acc, voto) => {
+      acc[voto.fotografia_id] = (acc[voto.fotografia_id] || 0) + 1
+      return acc
+    }, {})
+
+    return data
+      .map((foto) => ({
+        ...foto,
+        total_votos: conteoVotos[foto.id] || 0,
+      }))
+      .sort((a, b) => b.total_votos - a.total_votos)
+  }
 }
 
 export default Fotografia

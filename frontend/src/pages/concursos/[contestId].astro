@@ -1,0 +1,124 @@
+---
+import Layout from '@layouts/Layout.astro'
+import GaleriaConcursoSection from '@sections/GaleriaConcursoSection.astro'
+import WarpBackground from '@components/WarpBackground.tsx'
+
+interface Concurso {
+  id: string
+  nombre: string
+  descripcion?: string
+  fecha_inicio?: string
+  fecha_fin?: string
+}
+
+// 1) Extraemos el contestId
+const { contestId } = Astro.params as { contestId: string }
+
+// 2) SSR: traemos datos del concurso
+const backendURL = import.meta.env.PUBLIC_BACKEND_BASE_URL
+let concurso: Concurso | null = null
+let errorConcurso: string | null = null
+
+try {
+  const res = await fetch(`${backendURL}/api/concursos/${contestId}`)
+  if (!res.ok) throw new Error(`Concurso HTTP ${res.status}`)
+  concurso = await res.json()
+} catch (e: unknown) {
+  console.error('[SSR directo] Error fetching concurso:', e)
+  errorConcurso = 'No se pudieron cargar los datos del concurso.'
+}
+
+// 3) Obtenemos `user` desde Astro.locals.user
+const user = Astro.locals.user ?? null
+
+const scheme = {
+  color1: '#0f172a',
+  color2: '#1e3a8a',
+  color3: '#6366f1',
+  speed: 0.3,
+  swirl: 2.0,
+  swirlIterations: 10,
+  shapeScale: 0.6,
+}
+---
+
+<Layout
+  user={user}
+  title={`Concurso ${concurso?.nombre ?? contestId} | RallyShot`}
+>
+  <main class="relative min-h-screen">
+    {
+      !errorConcurso && (
+        <section class="relative h-50 w-full overflow-hidden border-b border-gray-700 shadow-lg mb-8">
+          <WarpBackground
+            client:load
+            color1={scheme.color1}
+            color2={scheme.color2}
+            color3={scheme.color3}
+            speed={scheme.speed}
+            swirl={scheme.swirl}
+            swirlIterations={scheme.swirlIterations}
+            shapeScale={scheme.shapeScale}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+            }}
+          />
+          <div class="absolute inset-0 bg-black/40 z-0" />
+          <h1 class="absolute inset-0 flex items-center justify-center text-white text-6xl font-limelight px-6 z-10 text-left">
+            {concurso?.nombre || 'No disponible'}
+          </h1>
+        </section>
+      )
+    }
+
+    <div class="max-w-5xl mx-auto p-6">
+      <!-- Contenedor donde inyectaremos "Unirme" u "Ya estás unido" + formulario -->
+      <section id="inscripcion-container" class="mb-8">
+        <div
+          class="max-w-xl font-light mx-auto rounded border border-red-500 bg-primary text-gray-200 p-4 text-center"
+        >
+          {
+            user ? (
+              <p>Comprobando estado de inscripción…</p>
+            ) : (
+              <p>
+                Debes{' '}
+                <a
+                  href="/login"
+                  class="text-blue-600 font-bold underline hover:text-blue-500"
+                >
+                  iniciar sesión
+                </a>
+                para unirte al concurso.
+              </p>
+            )
+          }
+        </div>
+      </section>
+
+      <GaleriaConcursoSection
+        contestId={contestId}
+        page={Number(
+          new URL(Astro.request.url).searchParams.get('page') || '1'
+        )}
+        limit={Number(
+          new URL(Astro.request.url).searchParams.get('limit') || '3'
+        )}
+        sortBy={new URL(Astro.request.url).searchParams.get('sortBy') ||
+          'fecha_subida'}
+        order={new URL(Astro.request.url).searchParams.get('order') || 'desc'}
+      />
+    </div>
+  </main>
+
+  <script type="module" define:vars={{ user, contestId }}>
+    import { initInscripcion } from '/scripts/participacion.js'
+    initInscripcion({ user, contestId })
+  </script>
+
+  <script type="module" src="/scripts/fullscreen.js"></script>
+</Layout>

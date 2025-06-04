@@ -1,0 +1,90 @@
+---
+import FotoCard from '@components/FotoCard.astro'
+import Paginacion from '@components/Paginacion.astro'
+
+interface FotografiaPorConcurso {
+  id: string
+  titulo: string
+  descripcion?: string
+  url_imagen: string
+  fecha_subida: string
+  concurso_id: string
+  usuarios: { display_name: string }
+  total_votos: number
+}
+
+// Props que recibe la sección
+const {
+  contestId,
+  page = 1,
+  limit = 3,
+  sortBy = 'fecha_subida',
+  order = 'desc',
+} = Astro.props as {
+  contestId: string
+  page?: number
+  limit?: number
+  sortBy?: string
+  order?: string
+}
+
+let fotos: FotografiaPorConcurso[] = []
+let errorMsg: string | null = null
+
+const urlObj = new URL(Astro.request.url)
+const origin = urlObj.origin
+
+try {
+  const fetchUrl = `${origin}/api/gallery/${contestId}?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
+  const res = await fetch(fetchUrl)
+  if (!res.ok) throw new Error(`Galería HTTP ${res.status}`)
+  fotos = await res.json()
+} catch (e: unknown) {
+  console.error('[ContestGallerySection] Error fetching gallery:', e)
+  errorMsg = 'No se pudieron cargar las fotografías de este concurso.'
+}
+
+// Calculamos si hay “siguiente página” — asumimos que si la cantidad de fotos recibidas
+// es igual a `limit`, entonces probablemente haya una siguiente página.
+const hasNextPage = fotos.length === limit
+---
+
+<section class="mt-8">
+  {
+    errorMsg ? (
+      <div class="bg-red-800 text-red-200 p-4 rounded-md">{errorMsg}</div>
+    ) : fotos.length === 0 ? (
+      <div class="text-gray-400 italic">
+        No hay fotografías admitidas para este concurso (o aún no se cargaron).
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 gap-8">
+        {fotos.map((foto) => (
+          <FotoCard
+            key={foto.id}
+            id={foto.id}
+            titulo={foto.titulo}
+            descripcion={foto.descripcion}
+            url_imagen={foto.url_imagen}
+            fecha_subida={foto.fecha_subida}
+            total_votos={foto.total_votos}
+            autor={foto.usuarios.display_name}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  {
+    !errorMsg && fotos.length > 0 && (
+      <Paginacion
+        contestId={contestId}
+        page={page}
+        limit={limit}
+        sortBy={sortBy}
+        order={order}
+        hasNextPage={hasNextPage}
+      />
+    )
+  }
+</section>

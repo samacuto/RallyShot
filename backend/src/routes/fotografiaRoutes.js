@@ -30,6 +30,8 @@ router.get('/:id/votes', FotografiaController.getVoteCount)
 
 router.get('/ranking', FotografiaController.getRanking)
 
+router.get('/ranking-global', FotografiaController.getRankingGlobal)
+
 router.delete('/:id', verifyToken, requireAuth, FotografiaController.delete)
 
 export default router

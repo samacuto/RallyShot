@@ -1,0 +1,139 @@
+---
+import Layout from '@layouts/Layout.astro'
+import WarpBackground from '@components/WarpBackground.tsx'
+import { LoaderCircle, Eye, EyeOff } from '@lucide/astro'
+
+export const prerender = false
+const error = Astro.url.searchParams.get('error') === '1'
+---
+
+<Layout title="Iniciar sesión | RallyShot">
+  <!-- Contenedor general del login -->
+  <div
+    class="min-h-screen bg-zinc-900 flex flex-col items-center justify-start pt-24"
+  >
+    <div class="relative w-full max-w-md">
+      <!-- Fondo detrás -->
+      <div
+        class="absolute inset-[-50px] z-0 rounded-2xl overflow-hidden border border-gray-700 scale-105"
+      >
+        <WarpBackground
+          color1="#0f172a"
+          color2="#1e3a8a"
+          color3="#6366f1"
+          speed={0.3}
+          swirl={2.0}
+          swirlIterations={10}
+          shapeScale={0.6}
+          client:load
+        />
+      </div>
+
+      <!-- Formulario -->
+      <section
+        class="relative z-10 w-full max-w-md p-6 mt-8 bg-primary text-white rounded-2xl border-1 border-gray-700"
+      >
+        <h1 class="text-xl font-bold text-center text-gray-200 mb-6">
+          Iniciar sesión
+        </h1>
+
+        {
+          error && (
+            <p class="mb-4 text-red-400 text-sm text-center">
+              Error en el login. Verifica tus credenciales.
+            </p>
+          )
+        }
+
+        <form
+          method="POST"
+          action="/api/login"
+          class="space-y-4"
+          id="login-form"
+        >
+          <div>
+            <input
+              required
+              type="text"
+              name="emailOrUsername"
+              placeholder="Email o usuario"
+              class="mt-1 block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+            />
+          </div>
+
+          <div class="relative">
+            <input
+              required
+              type="password"
+              name="password"
+              id="password-input"
+              placeholder="Contraseña"
+              class="mt-1 block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm pr-10"
+            />
+
+            <!-- Botón de mostrar/ocultar -->
+            <button
+              type="button"
+              id="toggle-password"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+              aria-label="Mostrar u ocultar contraseña"
+            >
+              <Eye id="eye-icon" class="h-5 w-5" />
+              <EyeOff id="eye-off-icon" class="h-5 w-5 hidden" />
+            </button>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              id="login-button"
+              class="bg-blue-800 text-white py-2 px-6 rounded font-semibold hover:bg-blue-700 flex items-center gap-2 cursor-pointer text-sm"
+            >
+              <span id="button-text">Entrar</span>
+              <LoaderCircle id="spinner" class="h-5 w-5 animate-spin hidden" />
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 text-center space-y-2">
+          <a
+            href="/olvide-contrasena"
+            class="text-sm text-blue-400 hover:underline block"
+          >
+            ¿Olvidaste tu contraseña?
+          </a>
+          <a href="/register" class="text-sm text-gray-300 hover:underline">
+            ¿No tienes cuenta? Regístrate aquí
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <script is:inline>
+      const form = document.getElementById('login-form')
+      const button = document.getElementById('login-button')
+      const spinner = document.getElementById('spinner')
+      const text = document.getElementById('button-text')
+
+      form?.addEventListener('submit', () => {
+        button.disabled = true
+        spinner.classList.remove('hidden')
+        text.textContent = 'Entrando...'
+      })
+
+      // Mostrar/ocultar contraseña
+      const passwordInput = document.getElementById('password-input')
+      const toggleBtn = document.getElementById('toggle-password')
+      const eyeIcon = document.getElementById('eye-icon')
+      const eyeOffIcon = document.getElementById('eye-off-icon')
+
+      toggleBtn?.addEventListener('click', () => {
+        const isVisible = passwordInput.type === 'text'
+        passwordInput.type = isVisible ? 'password' : 'text'
+
+        eyeIcon.classList.toggle('hidden', !isVisible)
+        eyeOffIcon.classList.toggle('hidden', isVisible)
+      })
+    </script>
+  </div>
+</Layout>

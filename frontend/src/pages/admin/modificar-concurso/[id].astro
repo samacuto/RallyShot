@@ -1,0 +1,163 @@
+---
+import Layout from '@layouts/Layout.astro'
+import WarpBackground from '@components/WarpBackground.tsx'
+
+export const prerender = false
+
+const { id } = Astro.params
+const error = Astro.url.searchParams.get('error') ?? null
+
+const token = Astro.cookies.get('access_token')?.value ?? ''
+
+const res = await fetch(
+  `${import.meta.env.PUBLIC_BACKEND_BASE_URL}/api/concursos/${id}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+)
+
+const concurso = await res.json()
+const user = Astro.locals.user ?? null
+---
+
+<Layout user={user} title="Editar Concurso | RallyShot">
+  <main
+    class="min-h-screen bg-zinc-900 flex flex-col items-center justify-start pt-24"
+  >
+    <div class="relative w-full max-w-3xl px-4 mb-24">
+      <div
+        class="absolute -inset-x-8 -top-8 -bottom-8 z-0 rounded-2xl overflow-hidden border border-zinc-600"
+      >
+        <WarpBackground
+          color1="#1e293b"
+          color2="#3b82f6"
+          color3="#60a5fa"
+          speed={0.35}
+          swirl={2.8}
+          swirlIterations={10}
+          shapeScale={0.5}
+          client:load
+        />
+      </div>
+
+      <article
+        class="relative z-10 w-full p-6 mt-8 bg-zinc-700 rounded-xl border border-zinc-600 shadow-md"
+      >
+        <header class="mb-8 border-b border-zinc-500 pb-4 text-center">
+          <h1 class="text-2xl font-bold text-gray-100 tracking-wide">
+            Editar Concurso
+          </h1>
+        </header>
+
+        {
+          error && (
+            <p class="mb-4 text-red-400 text-sm text-center">
+              {decodeURIComponent(error)}
+            </p>
+          )
+        }
+
+        <form
+          method="POST"
+          action="/api/concursos/modificar-concurso"
+          class="space-y-5 text-sm text-gray-200"
+        >
+          <input type="hidden" name="id" value={id} />
+
+          <label class="block">
+            <span class="block font-semibold mb-1">Título</span>
+            <input
+              name="nombre"
+              value={concurso.nombre}
+              required
+              class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </label>
+
+          <label class="block">
+            <span class="block font-semibold mb-1">Descripción</span>
+            <textarea
+              name="descripcion"
+              required
+              class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >{concurso.descripcion.trim()}</textarea
+            >
+          </label>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="block">
+              <span class="block font-semibold mb-1">Fecha de inicio</span>
+              <input
+                type="date"
+                name="fecha_inicio"
+                value={concurso.fecha_inicio}
+                required
+                class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-semibold mb-1"
+                >Fecha límite de subida</span
+              >
+              <input
+                type="date"
+                name="fecha_fin_subida"
+                value={concurso.fecha_fin_subida}
+                required
+                class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-semibold mb-1">Inicio de votación</span>
+              <input
+                type="date"
+                name="fecha_inicio_votacion"
+                value={concurso.fecha_inicio_votacion}
+                required
+                class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
+
+            <label class="block">
+              <span class="block font-semibold mb-1">Fin de votación</span>
+              <input
+                type="date"
+                name="fecha_fin_votacion"
+                value={concurso.fecha_fin_votacion}
+                required
+                class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
+
+            <label class="block md:col-span-2">
+              <span class="block font-semibold mb-1"
+                >Máx. fotos por participante</span
+              >
+              <input
+                type="number"
+                name="max_fotos_participante"
+                value={concurso.max_fotos_participante}
+                min="1"
+                required
+                class="w-full rounded bg-zinc-800 border border-zinc-500 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </label>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              class="mt-6 inline-flex items-center gap-2 px-3 py-2 bg-blue-800 text-white text-sm border border-blue-500 rounded-md hover:opacity-85 hover:border-blue-400 transition shadow cursor-pointer"
+            >
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </main>
+</Layout>

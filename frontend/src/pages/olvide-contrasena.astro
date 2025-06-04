@@ -1,0 +1,48 @@
+---
+import Layout from '@layouts/Layout.astro'
+export const prerender = false
+
+const { searchParams } = Astro.url
+const userId = searchParams.get('userId') || ''
+const codigo = searchParams.get('codigo') || ''
+---
+
+<Layout>
+  <section class="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
+    <h1 class="text-xl font-bold mb-4 text-center">Cambiar contraseña</h1>
+    <form method="POST" action="/api/cambiar-contrasena" class="space-y-4">
+      <input required type="hidden" name="userId" value={userId} />
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Código</label>
+        <input
+          required
+          type="text"
+          name="codigo"
+          value={codigo}
+          class="input"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700"
+          >Nueva contraseña</label
+        >
+        <input required type="password" name="nueva_password" class="input" />
+      </div>
+
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded">
+        Cambiar contraseña
+      </button>
+    </form>
+  </section>
+
+  <style>
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+    }
+  </style>
+</Layout>
