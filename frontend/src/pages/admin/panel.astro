@@ -8,10 +8,23 @@ import type { Concurso, Usuario } from '@lib/types/types'
 import ConcursoAdminCard from '@components/ConcursoAdminCard.astro'
 import ModalEliminar from '@components/ModalEliminar.astro'
 import UsuarioAdminCard from '@components/UsuarioAdminCard.astro'
+import { fetchFotosPendientesPorConcurso } from '@lib/fetchFotosPendientesPorConcurso'
+import FotoPendienteCard from '@components/FotoPendienteCard.tsx'
 
 const concursos: Concurso[] = await fetchConcurso()
 const usuarios: Usuario[] = await fetchUsuarios(
   Astro.request.headers.get('cookie') ?? ''
+)
+
+// Para cada concurso, carga sus fotos pendientes
+const fotosPendientesPorConcurso = await Promise.all(
+  concursos.map(async (c) => ({
+    concurso: c,
+    fotos: await fetchFotosPendientesPorConcurso(
+      c.id,
+      Astro.request.headers.get('cookie') ?? ''
+    ),
+  }))
 )
 
 const user = Astro.locals.user ?? null
@@ -96,6 +109,30 @@ const user = Astro.locals.user ?? null
               )
             }
           </section>
+        </section>
+
+        <section class="mt-12 space-y-8">
+          <h3 class="text-xl font-semibold text-gray-200">
+            Fotografías pendientes por concurso:
+          </h3>
+          {
+            fotosPendientesPorConcurso.map(({ concurso, fotos }) => {
+              if (fotos.length === 0) return null
+
+              return (
+                <div>
+                  <h4 class="text-lg font-medium text-green-400 mb-2">
+                    {concurso.titulo}
+                  </h4>
+                  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {fotos.map((foto) => (
+                      <FotoPendienteCard client:load foto={foto} />
+                    ))}
+                  </div>
+                </div>
+              )
+            })
+          }
         </section>
       </article>
     </section>
