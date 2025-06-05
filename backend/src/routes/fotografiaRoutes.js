@@ -34,4 +34,12 @@ router.get('/ranking-global', FotografiaController.getRankingGlobal)
 
 router.delete('/:id', verifyToken, requireAuth, FotografiaController.delete)
 
+router.get(
+  '/pending/:contestId',
+  verifyToken,
+  requireAuth,
+  requireAdmin,
+  FotografiaController.getPendingByContest
+)
+
 export default router

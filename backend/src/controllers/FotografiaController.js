@@ -134,6 +134,22 @@ class FotografiaController {
       res.status(500).json({ error: 'No se pudo obtener el ranking global' })
     }
   }
+
+  static async getPendingByContest(req, res) {
+    try {
+      const contestId = req.params.contestId
+
+      const photos = await Fotografia.getPendingByContest(contestId)
+      res.status(200).json(photos)
+    } catch (error) {
+      console.error('Error al obtener fotos pendientes por concurso:', error)
+      res
+        .status(500)
+        .json({
+          error: 'No se pudieron obtener las fotos pendientes del concurso',
+        })
+    }
+  }
 }
 
 export default FotografiaController

@@ -133,8 +133,6 @@ class Fotografia {
     }))
   }
 
-  // models/Fotografia.js
-
   static async getRankingGlobal() {
     const { data, error } = await adminClient
       .from('fotografias')
@@ -176,6 +174,18 @@ class Fotografia {
         total_votos: conteoVotos[foto.id] || 0,
       }))
       .sort((a, b) => b.total_votos - a.total_votos)
+  }
+
+  static async getPendingByContest(concursoId) {
+    const { data, error } = await adminClient
+      .from('fotografias')
+      .select('*')
+      .eq('estado', 'pendiente')
+      .eq('concurso_id', concursoId)
+
+    if (error)
+      throw new Error('Error al consultar las fotos pendientes del concurso')
+    return data
   }
 }
 
