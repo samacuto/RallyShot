@@ -13,7 +13,8 @@
       "@sections/*": ["src/sections/*"],
       "@types/*": ["src/lib/types/*"],
       "@lib/*": ["src/lib/*"],
-      "@utils/*": ["src/lib/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@scripts/*": ["src/scripts/*"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"

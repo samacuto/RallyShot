@@ -1,46 +1,33 @@
 ---
 import FotoDestacada from '@components/FotoDestacada.astro'
-import type { Foto } from '../lib/types/types'
+import type { Fotografia } from '../lib/types/types'
 
-const { fotosDestacadas = [] } = Astro.props
-const hayFotos = Array.isArray(fotosDestacadas) && fotosDestacadas.length > 0
-
-let openedIndex = -1
-
-function handleOpen(index) {
-  openedIndex = openedIndex === index ? -1 : index
+const { fotosDestacadas = [] } = Astro.props as {
+  fotosDestacadas: Fotografia[]
 }
+const hayFotos = Array.isArray(fotosDestacadas) && fotosDestacadas.length > 0
 ---
 
 {
   hayFotos && (
-    <section class="py-16 px-4 bg-gray-100">
-      <div class="max-w-7xl mx-auto">
-        <h2 class="text-3xl font-bold mb-8 text-center">Fotos Destacadas</h2>
-        <div
-          id="portfolio-gallery"
-          class="relative w-full h-[500px] max-w-[1140px] mx-auto"
-          style="min-height: 400px;"
-        >
-          {fotosDestacadas.map((foto, i) => (
-            <FotoDestacada
-              foto={foto}
-              index={i}
-              opened={false}
-              data-index={i}
-            />
-          ))}
-        </div>
-        <div id="portfolio-navi" class="flex justify-center gap-2 mt-8">
-          {fotosDestacadas.map((_, i) => (
-            <button
-              type="button"
-              class="circle w-5 h-5 rounded-full border border-gray-700 bg-gray-200 hover:bg-gray-400 transition-colors"
-              data-index={i}
-              aria-label={`Seleccionar foto ${i + 1}`}
-            />
-          ))}
-        </div>
+    <section class="bg-secondary py-10 px-4 max-w-6xl mx-auto z-10 space-y-12">
+      <h2 class="text-5xl text-gray-300 text-center font-merriweather font-bold tracking-wide">
+        Fotos destacadas
+      </h2>
+
+      <div
+        id="portfolio-gallery"
+        class="relative w-full min-h-[400px] md:min-h-[500px] max-w-[1140px] mx-auto overflow-visible"
+      >
+        {fotosDestacadas.map((foto, i) => (
+          <FotoDestacada
+            foto={foto}
+            index={i}
+            isFirst={i === 0}
+            isLast={i === fotosDestacadas.length - 1}
+            data-index={i}
+          />
+        ))}
       </div>
     </section>
   )
@@ -49,56 +36,73 @@ function handleOpen(index) {
 <script is:inline>
   document.addEventListener('DOMContentLoaded', function () {
     const gallery = document.getElementById('portfolio-gallery')
-    const navi = document.getElementById('portfolio-navi')
     if (!gallery) return
-    const items = gallery.querySelectorAll('.portfolio')
-    const circles = navi ? navi.querySelectorAll('.circle') : []
+
+    const items = Array.from(gallery.querySelectorAll('.portfolio'))
+
+    function closeAll() {
+      items.forEach((el) => {
+        el.classList.remove('opened')
+        el.style.display = ''
+      })
+    }
+
     items.forEach((item, idx) => {
+      // Al hacer clic en miniatura, abrimos
       item.addEventListener('click', function (e) {
         e.stopPropagation()
-        const isOpened = item.classList.contains('opened')
-        items.forEach((el) => {
-          el.classList.remove('opened')
-          el.style.display = ''
-        })
-        if (!isOpened) {
-          item.classList.add('opened')
-          items.forEach((el) => {
-            if (el !== item) el.style.display = 'none'
-          })
-          if (circles[idx]) {
-            circles.forEach((c) => c.classList.remove('activenav'))
-            circles[idx].classList.add('activenav')
-          }
-        } else {
-          if (circles[idx]) circles[idx].classList.remove('activenav')
-        }
-      })
-    })
-    // Botones de navegación
-    circles.forEach((circle, idx) => {
-      circle.addEventListener('click', function (e) {
-        e.stopPropagation()
-        items.forEach((el, i) => {
-          el.classList.remove('opened')
-          el.style.display = ''
-          circles[i].classList.remove('activenav')
-        })
-        items[idx].classList.add('opened')
-        circles[idx].classList.add('activenav')
+        // Si ya está abierto, no hacemos nada (sólo el botón “X” cierra).
+        if (item.classList.contains('opened')) return
+        // Si no está abierto, lo abrimos y ocultamos los demás.
+        closeAll()
+        item.classList.add('opened')
         items.forEach((el, i) => {
           if (i !== idx) el.style.display = 'none'
         })
       })
+
+      // Botón Cerrar
+      const closeBtn = item.querySelector('[data-action="close"]')
+      closeBtn?.addEventListener('click', function (e) {
+        e.stopPropagation()
+        closeAll()
+      })
+
+      // Botón Anterior
+      const prevBtn = item.querySelector('[data-action="prev"]')
+      prevBtn?.addEventListener('click', function (e) {
+        e.stopPropagation()
+        const prevIdx = idx - 1
+        if (prevIdx >= 0) {
+          closeAll()
+          const prevItem = items[prevIdx]
+          prevItem.classList.add('opened')
+          items.forEach((el, i) => {
+            if (i !== prevIdx) el.style.display = 'none'
+          })
+        }
+      })
+
+      // Botón Siguiente
+      const nextBtn = item.querySelector('[data-action="next"]')
+      nextBtn?.addEventListener('click', function (e) {
+        e.stopPropagation()
+        const nextIdx = idx + 1
+        if (nextIdx < items.length) {
+          closeAll()
+          const nextItem = items[nextIdx]
+          nextItem.classList.add('opened')
+          items.forEach((el, i) => {
+            if (i !== nextIdx) el.style.display = 'none'
+          })
+        }
+      })
     })
-    // Cerrar al hacer clic fuera
+
+    // Cerrar si se clickea fuera
     document.addEventListener('click', function (e) {
-      if (!gallery.contains(e.target) && (!navi || !navi.contains(e.target))) {
-        items.forEach((el, i) => {
-          el.classList.remove('opened')
-          el.style.display = ''
-          if (circles[i]) circles[i].classList.remove('activenav')
-        })
+      if (!gallery.contains(e.target)) {
+        closeAll()
       }
     })
   })
@@ -107,33 +111,74 @@ function handleOpen(index) {
 <style>
   .portfolio {
     position: absolute;
-    transition: 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
     box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
     cursor: pointer;
+    overflow: hidden;
+    background: #000;
+  }
+  .portfolio.rotated {
+    transform: rotate(-2deg);
+  }
+  .portfolio.rotated:not(.opened):hover {
+    transform: translateY(-10px) rotate(-2deg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   }
   .portfolio.opened {
+    position: relative;
     z-index: 1000;
     left: 0 !important;
     transform: rotate(0deg) !important;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-    width: 100% !important;
-    max-width: 1140px !important;
+    width: 90% !important;
+    max-width: 1024px !important;
   }
-  .circle {
-    display: inline-block;
+  .portfolio .info {
+    display: none;
+  }
+  .portfolio.opened .info {
+    display: block;
+    position: relative;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1rem;
+    color: #f0f0f0;
+  }
+  .close-btn,
+  .prev-btn,
+  .next-btn {
+    font-size: 1rem;
+    line-height: 1;
+    border: none;
     cursor: pointer;
-    border: 1px solid #333;
-    background: #efefef;
-    margin-right: 6px;
-    transition:
-      background 0.3s,
-      border 0.3s;
   }
-  .circle:last-child {
-    margin-right: 0;
+  .close-btn:hover,
+  .prev-btn:hover,
+  .next-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
-  .circle.activenav {
-    background: #666;
-    border: 1px solid #333;
+  .info-title {
+    margin: 0;
+  }
+  .info-desc {
+    margin-bottom: 0.75rem;
+  }
+  .info-meta span {
+    /* puedes poner iconos o estilos extras */
+  }
+  .ombra {
+    box-shadow: 0 15px 10px rgba(0, 0, 0, 0.7);
+    transform: rotate(-2deg);
+    z-index: -1;
+    border-radius: 9999px;
+  }
+  .txt {
+    margin-top: -2px;
+    padding-top: 20px;
+    width: 98%;
+    padding-left: 2%;
+    height: 33px;
+    background: #f7f7f7;
   }
 </style>

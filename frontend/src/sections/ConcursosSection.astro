@@ -1,8 +1,7 @@
 ---
 import ConcursoCard from '@components/ConcursoCard.astro'
-import type { Concurso } from '../lib/types/types'
+import type { Concurso } from '@lib/types/types'
 
-// Definimos exactamente los mismos esquemas que luego usaremos en [contestId].astro
 const schemes = [
   {
     color1: '#ff416c',
@@ -90,13 +89,16 @@ const schemes = [
 const { concursos } = Astro.props
 ---
 
-<section class="bg-primary py-16 px-4 max-w-6xl mx-auto z-10 space-y-12">
-  <h2 class="text-3xl text-white font-bold mb-8 text-center">Concursos</h2>
+<section class="bg-secondary py-10 px-4 max-w-6xl mx-auto z-10 space-y-12">
+  <h2
+    class="text-5xl text-gray-300 text-center font-merriweather font-bold tracking-wide"
+  >
+    Concursos
+  </h2>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {
       concursos.map((concurso: Concurso, index: number) => {
-        // Elegimos el esquema según el índice
         const scheme = schemes[index % schemes.length]
         return <ConcursoCard concurso={concurso} scheme={scheme} />
       })
@@ -105,7 +107,7 @@ const { concursos } = Astro.props
 
   {
     concursos.length === 0 && (
-      <p class="text-center text-gray-400">
+      <p class="text-center text-gray-200">
         No hay concursos disponibles en este momento.
       </p>
     )

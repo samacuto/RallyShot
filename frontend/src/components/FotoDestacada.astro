@@ -1,58 +1,160 @@
 ---
-const { foto, opened = false, index = 0 } = Astro.props
-const placeholder = 'https://via.placeholder.com/600x400?text=Sin+Imagen'
+import type { Fotografia } from '@lib/types/types'
+import { X, ChevronLeft, ChevronRight, User, Image, Heart } from '@lucide/astro'
 
-// Calcula el desplazamiento y rotación según el índice
+const {
+  foto,
+  index = 0,
+  isFirst = false,
+  isLast = false,
+} = Astro.props as {
+  foto: Fotografia
+  index?: number
+  isFirst?: boolean
+  isLast?: boolean
+}
+
 const lefts = ['10px', '10%', '20%', '30%', '40%']
 const left = lefts[index] || `${index * 10}%`
-const rotation = opened ? 'rotate(0deg)' : 'rotate(-2deg)'
 ---
 
 <div
-  class={`portfolio${opened ? ' opened' : ''}`}
-  style={`left: ${opened ? '0' : left}; transform: ${rotation}; max-width: 400px; z-index: ${opened ? 1000 : 1};`}
+  class="portfolio rotated bg-primary"
+  data-index={index}
+  style={`left: ${left}; z-index: 1; max-width: 400px;`}
 >
+  <!-- Imagen -->
   <img
-    src={foto.url || placeholder}
+    src={foto.url_imagen}
     alt={foto.titulo}
-    class="w-full object-cover"
-    onerror="this.onerror=null;this.src='https://via.placeholder.com/600x400?text=Sin+Imagen'"
+    class="w-full object-cover h-auto"
+    onerror="this.onerror=null;"
   />
-  <span class="txt block bg-gray-100 px-4 py-2 text-sm">{foto.titulo}</span>
-  <div
-    class="ombra absolute bottom-5 left-2 w-[90%] h-5"
-    style={`display: ${opened ? 'block' : 'none'};`}
-  >
-  </div>
-</div>
 
-<style>
-  .portfolio {
-    position: absolute;
-    transition: 0.2s;
-    box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-  }
-  .portfolio.opened {
-    z-index: 1000;
-    left: 0 !important;
-    transform: rotate(0deg) !important;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-    width: 100% !important;
-    max-width: 1140px !important;
-  }
-  .ombra {
-    box-shadow: 0 15px 10px rgba(0, 0, 0, 0.7);
-    transform: rotate(-2deg);
-    z-index: -1;
-    border-radius: 9999px;
-  }
-  .txt {
-    margin-top: -2px;
-    padding-top: 20px;
-    width: 98%;
-    padding-left: 2%;
-    height: 33px;
-    background: #f7f7f7;
-  }
-</style>
+  <!-- Título -->
+  <span
+    class="block text-gray-100 font-merriweather bg-primary px-4 mt-4 py-1 text-lg"
+  >
+    {foto.titulo}
+  </span>
+
+  <!-- 1) Botón Cerrar -->
+  <button
+    class="close-btn absolute top-3 right-3 text-white bg-black/70 border border-gray-200 rounded-full p-2 hidden z-20 cursor-pointer"
+    data-action="close"
+    aria-label="Cerrar"
+  >
+    <X class="w-5 h-5" />
+  </button>
+
+  <!-- Botón Anterior -->
+  <button
+    class={`prev-btn absolute top-1/2 left-3 text-white bg-black/70 border border-gray-200 rounded-full p-2 hidden transform -translate-y-1/2 z-20 ${
+      isFirst ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+    }`}
+    data-action="prev"
+    aria-label="Foto anterior"
+    disabled={isFirst}
+  >
+    <ChevronLeft class="w-6 h-6" />
+  </button>
+
+  <!-- Botón Siguiente -->
+  <button
+    class={`next-btn absolute top-1/2 right-3 text-white bg-black/70 border border-gray-200 rounded-full p-2 hidden transform -translate-y-1/2 z-20 ${
+      isLast ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+    }`}
+    data-action="next"
+    aria-label="Foto siguiente"
+    disabled={isLast}
+  >
+    <ChevronRight class="w-6 h-6" />
+  </button>
+
+  <!-- Información ampliada -->
+  <div class="info hidden relative p-4 text-gray-200">
+    <p class="mb-4">{foto.descripcion}</p>
+
+    <div
+      class="info-meta grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm"
+    >
+      <!-- Autor -->
+      <div class="flex items-center gap-2">
+        <User class="w-4 h-4 text-gray-400" />
+        <strong>{foto.nombre_autor}</strong>
+      </div>
+
+      <!-- Concurso -->
+      <div class="flex items-center gap-2">
+        <Image class="w-4 h-4 text-gray-400" />
+        <span>Concurso: <strong>{foto.nombre_concurso}</strong></span>
+      </div>
+
+      <!-- Votos -->
+      <div class="flex items-center text-base gap-2 text-red-400">
+        <Heart class="w-4 h-4 fill-current" />
+        <span>Votos: <strong>{foto.total_votos}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .portfolio {
+      position: absolute;
+      transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+      box-shadow: -2px 0 3px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .portfolio.rotated {
+      transform: rotate(-2deg);
+    }
+    .portfolio.rotated:not(.opened):hover {
+      transform: translateY(-10px) rotate(-2deg);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .portfolio.opened {
+      position: relative;
+      z-index: 1000;
+      left: 0 !important;
+      transform: rotate(0deg) !important;
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+      width: 90% !important;
+      max-width: 1024px !important;
+      margin: 0 auto;
+    }
+
+    /* Ocultar botones por defecto */
+    .close-btn,
+    .prev-btn,
+    .next-btn,
+    .info {
+      display: none;
+    }
+    /* Mostrar cuando .portfolio tenga .opened */
+    /* Mostrar cuando .portfolio tenga .opened */
+    .portfolio.opened .close-btn,
+    .portfolio.opened .prev-btn,
+    .portfolio.opened .next-btn,
+    .portfolio.opened .info {
+      display: block;
+    }
+
+    /* Hover para todos los botones */
+    .close-btn:hover,
+    .prev-btn:hover,
+    .next-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Si están deshabilitados, quitar interacción y bajar opacidad */
+    .prev-btn:disabled,
+    .next-btn:disabled {
+      pointer-events: none;
+      opacity: 0.3;
+    }
+  </style>
+</div>

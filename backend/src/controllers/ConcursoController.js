@@ -16,19 +16,19 @@ class ConcursoController {
 
   static async create(req, res) {
     try {
-      console.log('📥 Concurso recibido en req.body:', req.body)
-      console.log('🧑 ID del creador (req.user.id):', req.user?.id)
+      console.log('Concurso recibido en req.body:', req.body)
+      console.log('ID del creador (req.user.id):', req.user?.id)
 
       const nuevoId = await Concurso.create(req.body, req.user.id)
 
-      console.log('✅ Concurso creado con ID:', nuevoId)
+      console.log('Concurso creado con ID:', nuevoId)
 
       res.status(201).json({
         message: 'Concurso creado correctamente',
         id: nuevoId,
       })
     } catch (error) {
-      console.error('❌ Error creando concurso:', error)
+      console.error('Error creando concurso:', error)
       res.status(400).json({ error: error.message })
     }
   }
@@ -96,10 +96,10 @@ class ConcursoController {
 
   static async delete(req, res) {
     try {
-      const { id } = req.params // ✅ Esto está bien
+      const { id } = req.params
 
-      console.log('🧩 ID recibido:', id)
-      await Concurso.delete(id) // ⛔ Aquí probablemente estás pasando un objeto en lugar de string
+      console.log('ID recibido:', id)
+      await Concurso.delete(id)
 
       res.status(204).end()
     } catch (error) {

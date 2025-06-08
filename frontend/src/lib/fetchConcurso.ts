@@ -1,5 +1,5 @@
 import type { Concurso, Foto } from './types/types'
-import { getFotoUrl } from '@lib/utils/getFotoUrl'
+import { getFotoUrl } from 'src/utils/getFotoUrl'
 
 const API_CONCURSOS = `${import.meta.env.PUBLIC_BACKEND_BASE_URL}/api/concursos`
 const API_GALLERY = `${

@@ -1,46 +1,55 @@
 ---
-import RallyShotLogo from '@components/RallyShotLogo.astro'
+import RallyShotLogo from '@assets/rallyshot-logo.svg'
 const { user = null } = Astro.props
 ---
 
-<section class="relative h-[60vh] text-white bg-primary overflow-hidden">
-  <!-- Overlay oscuro para contraste -->
-  <div class="absolute inset-0 bg-black/10 -z-0"></div>
-
+<section class="relative h-[50vh] text-white bg-secondary overflow-hidden">
   <!-- Contenedor del fondo de puntos -->
-  <div class="absolute inset-0 z-0 pointer-events-none" data-dot-container>
-    <canvas id="dotCanvas" class="w-full h-full"></canvas>
-  </div>
+  <canvas
+    id="dotCanvas"
+    data-dot-container
+    class="absolute inset-0 w-full h-full z-0 pointer-events-none"></canvas>
 
   <!-- Contenido principal de Hero, en z-10 -->
   <div
     class="relative h-full flex flex-col items-center justify-center text-center px-4 z-10"
   >
-    <RallyShotLogo class="w-full max-w-[360px] sm:max-w-[400px]" />
+    <RallyShotLogo class="w-full max-w-[460px] sm:max-w-[500px]" />
+
     <h2
-      class="text-lg mb-8 font-semibold text-gray-300 leading-loose tracking-wide"
+      class="text-xl mb-8 font-merriweather font-semibold text-gray-300 leading-loose tracking-wide"
     >
       Captura el momento. Comparte tu talento.
     </h2>
 
     {
       !user && (
-        <div class="flex gap-4">
-          <a
-            href="/register"
-            class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50"
-          >
-            Regístrate
-          </a>
-          <a
-            href="/login"
-            class="border-2 border-white px-6 py-3 rounded-full font-semibold hover:bg-white/10"
-          >
-            Inicia Sesión
-          </a>
-        </div>
+        <ul class="flex gap-4">
+          <li>
+            <a
+              href="/register"
+              class="bg-gray-100 text-blue-800 px-6 py-3 rounded-full font-semibold hover:bg-blue-100 flex items-center cursor-pointer transition-colors"
+            >
+              Regístrate
+            </a>
+          </li>
+          <li>
+            <a
+              href="/login"
+              class="text-sm font-semibold text-white border-2 border-blue-600 px-6 py-3 rounded-full flex items-center bg-blue-500/5 hover:bg-blue-500/20 hover:border-blue-400 transition-colors cursor-pointer"
+            >
+              Inicia Sesión
+            </a>
+          </li>
+        </ul>
       )
     }
+  </div>
+
+  <!-- Fade-out en la parte inferior -->
+  <div
+    class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-b from-transparent to-secondary z-10 pointer-events-none"
+  >
   </div>
 
   <!-- Script inline que inicializa la animación de puntos -->
@@ -48,7 +57,6 @@ const { user = null } = Astro.props
     ;(() => {
       // Buscamos el contenedor y el canvas
       const dotContainerWrapper = document.querySelector('[data-dot-container]')
-      console.log('DotContainer encontrado:', dotContainerWrapper)
       if (!dotContainerWrapper) return
 
       const container = dotContainerWrapper.parentElement
@@ -71,7 +79,7 @@ const { user = null } = Astro.props
           this.dots = []
           this.mouse = { x: 0, y: 0 }
           this.radius = 100
-          this.pinkColor = '#ffffff'
+          this.whiteColor = '#ffffff'
           this.grayColor = '#cccccc'
           this.dotSize = 1.0
           this.dotSpacing = 30
@@ -188,7 +196,7 @@ const { user = null } = Astro.props
               const normalizedDistance = distance / this.radius
               const intensity = Math.pow(1 - normalizedDistance, 2.5)
 
-              dot.targetColor = this.pinkColor
+              dot.targetColor = this.whiteColor
               dot.targetAlpha =
                 normalizedDistance < 0.3
                   ? 0.5 + intensity * 0.3
@@ -202,7 +210,7 @@ const { user = null } = Astro.props
               const currentRGB = this.hexToRgb(dot.color)
               const targetRGB = this.hexToRgb(dot.targetColor)
               const transitionSpeed =
-                dot.targetColor === this.pinkColor ? 0.15 : 0.05
+                dot.targetColor === this.whiteColor ? 0.15 : 0.05
 
               currentRGB.r += (targetRGB.r - currentRGB.r) * transitionSpeed
               currentRGB.g += (targetRGB.g - currentRGB.g) * transitionSpeed

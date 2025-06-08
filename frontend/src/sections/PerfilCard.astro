@@ -1,16 +1,9 @@
 ---
 import { Mail, Globe, Calendar } from '@lucide/astro'
+import type { Usuario } from '@lib/types/types'
 
 interface Props {
-  user: {
-    nombre: string
-    apellidos: string
-    display_name: string
-    email: string
-    pais: string
-    fecha_nacimiento: string
-    foto_perfil: string
-  }
+  user: Usuario
 }
 
 const { user } = Astro.props

@@ -1,22 +1,20 @@
 ---
-export const prerender = false
-
 import Layout from '@layouts/Layout.astro'
 import Hero from '@sections/Hero.astro'
 import ConcursosSection from '@sections/ConcursosSection.astro'
 import RankingSection from '@sections/RankingSection.astro'
-
 import { fetchConcurso } from '@lib/fetchConcurso'
-import { fetchFotografia } from '@lib/fetchFotografia'
-import type { Concurso, Foto } from '../lib/types/types'
+import { fetchFotografiaRankingGlobal } from '@lib/fetchFotografia'
+import type { Concurso, Fotografia } from '@lib/types/types'
 
 let concursos: Concurso[] = []
-let fotosDestacadas: Foto[] = []
+let fotosDestacadas: Fotografia[] = []
+
 const user = Astro.locals.user ?? null
 
 try {
   concursos = await fetchConcurso()
-  fotosDestacadas = await fetchFotografia()
+  fotosDestacadas = await fetchFotografiaRankingGlobal()
 } catch (error) {
   console.error('Error en index.astro:', error)
 }

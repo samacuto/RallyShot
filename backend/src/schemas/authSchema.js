@@ -22,7 +22,7 @@ export const authRegisterSchema = z.object({
         return edad >= 13
       },
       {
-        message: 'Debes tener al menos 13 años',
+        message: 'El usuario debe tener al menos 13 años',
       }
     ),
   pais: z.string().min(2, 'El país es obligatorio'),
@@ -58,7 +58,7 @@ export const updateUserSchema = z.object({
         return edad >= 13
       },
       {
-        message: 'Debes tener al menos 13 años',
+        message: 'El usuario debe tener al menos 13 años',
       }
     )
     .optional(),

@@ -98,12 +98,12 @@ let concurso: Concurso | null = null
 let errorConcurso: string | null = null
 
 try {
-  // 3) Pedir la lista completa de concursos
+  // Pedir la lista completa de concursos
   const resAll = await fetch(`${backendURL}/api/concursos`)
   if (!resAll.ok) throw new Error(`Error al cargar lista de concursos`)
   concursos = await resAll.json()
 
-  // 4) Pedir el detalle del concurso concreto
+  // Pedir el detalle del concurso concreto
   const resDetail = await fetch(`${backendURL}/api/concursos/${contestId}`)
   if (!resDetail.ok) throw new Error(`Concurso HTTP ${resDetail.status}`)
   concurso = await resDetail.json()
@@ -112,7 +112,7 @@ try {
   errorConcurso = 'No se pudieron cargar los datos del concurso.'
 }
 
-// 5) Encontrar el índice de este concurso en la lista completa
+// Encontrar el índice de este concurso en la lista completa
 let scheme = schemes[0]
 if (concurso) {
   const idx = concursos.findIndex((c) => c.id === concurso!.id)
@@ -120,7 +120,7 @@ if (concurso) {
   scheme = schemes[schemeIndex]
 }
 
-// 6) Lógica de estados (subida abierta o no)
+// Lógica de estados (subida abierta o no)
 const ahora = new Date()
 const fechaInicio = concurso?.fecha_inicio
   ? new Date(concurso.fecha_inicio)

@@ -133,27 +133,27 @@ class Fotografia {
     }))
   }
 
-  static async getRankingGlobal() {
-    const { data, error } = await adminClient
+  static async getRankingGlobal(limit = 10) {
+    // 1) Traer todas las fotografías admitidas con sólo los campos que interesan
+    const { data: fotosRaw, error: fotosError } = await adminClient
       .from('fotografias')
       .select(
         `
       id,
       titulo,
       url_imagen,
-      concurso:concurso_id (
-        id,
-        nombre
-      )
+      descripcion,
+      concurso:concurso_id ( nombre ),
+      autor:usuario_id ( nombre )
     `
       )
       .eq('estado', 'admitida')
 
-    if (error) {
+    if (fotosError) {
       throw new Error('Error al obtener ranking global')
     }
 
-    // Obtener todos los votos agrupados por foto
+    // 2) Traer todos los votos (solo necesitamos el campo fotografia_id)
     const { data: votosData, error: votosError } = await adminClient
       .from('votos')
       .select('fotografia_id')
@@ -163,17 +163,27 @@ class Fotografia {
       throw new Error('Error al contar votos')
     }
 
+    // 3) Hacer conteo de votos por fotografía (sin anotación de tipo)
     const conteoVotos = votosData.reduce((acc, voto) => {
-      acc[voto.fotografia_id] = (acc[voto.fotografia_id] || 0) + 1
+      const fotoId = voto.fotografia_id
+      acc[fotoId] = (acc[fotoId] || 0) + 1
       return acc
     }, {})
 
-    return data
+    // 4) Enriquecer cada foto con su número de votos y ordenar
+    const ordenadas = fotosRaw
       .map((foto) => ({
-        ...foto,
+        titulo: foto.titulo,
+        url_imagen: foto.url_imagen,
+        descripcion: foto.descripcion,
+        nombre_concurso: foto.concurso.nombre,
+        nombre_autor: foto.autor.nombre,
         total_votos: conteoVotos[foto.id] || 0,
       }))
       .sort((a, b) => b.total_votos - a.total_votos)
+
+    // 5) Devolver solo los primeros “limit”
+    return ordenadas.slice(0, limit)
   }
 
   static async getPendingByContest(concursoId) {
@@ -183,8 +193,13 @@ class Fotografia {
       .eq('estado', 'pendiente')
       .eq('concurso_id', concursoId)
 
-    if (error)
-      throw new Error('Error al consultar las fotos pendientes del concurso')
+    if (error) {
+      console.error('[getPendingByContest] Supabase error:', error)
+      throw new Error(
+        'No se pudieron obtener las fotos pendientes del concurso'
+      )
+    }
+
     return data
   }
 }

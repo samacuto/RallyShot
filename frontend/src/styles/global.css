@@ -3,8 +3,9 @@
 
 @theme {
   --font-inter: 'Inter', Arial, Helvetica, sans-serif;
-  --font-limelight: 'Limelight', Arial, Helvetica, sans-serif;
+  --font-limelight: 'Limelight', Tahoma, Verdana, sans-serif;
+  --font-merriweather: 'Merriweather', Verdana, sans-serif;
 
   --color-primary: #0a0a0a;
-  --color-secondary: #000000;
+  --color-secondary: #18181b;
 }

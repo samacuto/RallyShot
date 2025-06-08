@@ -6,6 +6,15 @@ export interface Foto {
   votos: number
 }
 
+export interface Fotografia {
+  titulo: string
+  url_imagen: string
+  descripcion: string
+  nombre_concurso: string
+  nombre_autor: string
+  total_votos: number
+}
+
 export type FotoPendiente = {
   id: string
   titulo: string

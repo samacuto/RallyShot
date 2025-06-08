@@ -1,0 +1,130 @@
+---
+import { Eye, EyeOff } from '@lucide/astro'
+
+const { error } = Astro.props
+---
+
+<section
+  class="w-full max-w-md p-6 bg-primary text-white rounded-2xl border border-gray-700"
+>
+  <h1 class="text-xl font-bold text-center text-gray-200 mb-6">Registro</h1>
+
+  {
+    error && (
+      <p class="mb-4 text-red-400 text-sm text-center">
+        {decodeURIComponent(error)}
+      </p>
+    )
+  }
+
+  <form
+    method="POST"
+    action="/api/register"
+    enctype="multipart/form-data"
+    class="space-y-4"
+  >
+    <input
+      required
+      name="email"
+      type="email"
+      placeholder="Correo electrónico"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+
+    <div class="relative">
+      <input
+        required
+        type="password"
+        name="password"
+        id="register-password"
+        placeholder="Contraseña"
+        class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm pr-10"
+      />
+      <button
+        type="button"
+        id="toggle-register-password"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+        aria-label="Mostrar u ocultar contraseña"
+      >
+        <Eye id="register-eye-icon" class="h-5 w-5" />
+        <EyeOff id="register-eye-off-icon" class="h-5 w-5 hidden" />
+      </button>
+    </div>
+
+    <input
+      required
+      name="nombre"
+      placeholder="Nombre"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+    <input
+      required
+      name="apellidos"
+      placeholder="Apellidos"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+    <input
+      required
+      name="fecha_nacimiento"
+      type="date"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+    <input
+      required
+      name="pais"
+      placeholder="País"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+    <input
+      required
+      name="display_name"
+      placeholder="Nombre de usuario"
+      class="block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+    />
+
+    <label class="block text-sm text-gray-200">
+      <span class="mb-1 inline-block font-semibold">Foto de perfil</span>
+      <input
+        type="file"
+        name="foto_perfil"
+        accept="image/*"
+        class="block w-full text-sm
+          file:px-2 file:py-1.5 file:text-white file:bg-green-800
+          file:border file:border-green-600 file:rounded-md file:shadow
+          hover:file:opacity-90 hover:file:border-green-400
+          file:transition file:cursor-pointer"
+      />
+    </label>
+
+    <button
+      type="submit"
+      id="register-button"
+      class="w-full mt-4 inline-flex justify-center items-center gap-2 px-4 py-2 bg-blue-800 text-white text-sm border border-blue-500 rounded-md hover:opacity-85 hover:border-blue-400 transition shadow cursor-pointer"
+    >
+      <span id="register-button-text">Registrarse</span>
+    </button>
+  </form>
+
+  <script is:inline>
+    const passwordInput = document.getElementById('register-password')
+    const toggleBtn = document.getElementById('toggle-register-password')
+    const eyeIcon = document.getElementById('register-eye-icon')
+    const eyeOffIcon = document.getElementById('register-eye-off-icon')
+
+    toggleBtn?.addEventListener('click', () => {
+      const isVisible = passwordInput.type === 'text'
+      passwordInput.type = isVisible ? 'password' : 'text'
+      eyeIcon.classList.toggle('hidden', !isVisible)
+      eyeOffIcon.classList.toggle('hidden', isVisible)
+    })
+
+    const form = document.querySelector('form')
+    const registerButton = document.getElementById('register-button')
+    const registerButtonText = document.getElementById('register-button-text')
+
+    form?.addEventListener('submit', () => {
+      registerButton.disabled = true
+      registerButtonText.textContent = 'Registrando...'
+    })
+  </script>
+</section>

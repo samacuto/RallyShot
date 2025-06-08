@@ -1,0 +1,105 @@
+---
+import { Eye, EyeOff, LoaderCircle } from '@lucide/astro'
+
+const { error = false } = Astro.props
+---
+
+<section
+  class="relative z-10 w-full max-w-md p-6 mt-8 bg-primary text-white rounded-2xl border-1 border-gray-700"
+>
+  <h1 class="text-xl font-bold text-center text-gray-200 mb-6">
+    Iniciar sesión
+  </h1>
+
+  {
+    error && (
+      <p class="mb-4 text-red-400 text-sm text-center">
+        {decodeURIComponent(error)}
+      </p>
+    )
+  }
+
+  <form method="POST" action="/api/login" class="space-y-4" id="login-form">
+    <div>
+      <input
+        required
+        type="text"
+        name="emailOrUsername"
+        placeholder="Email o usuario"
+        class="mt-1 block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm"
+      />
+    </div>
+
+    <div class="relative">
+      <input
+        required
+        type="password"
+        name="password"
+        id="password-input"
+        placeholder="Contraseña"
+        class="mt-1 block w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm placeholder-gray-400 shadow-sm pr-10"
+      />
+
+      <!-- Botón de mostrar/ocultar -->
+      <button
+        type="button"
+        id="toggle-password"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+        aria-label="Mostrar u ocultar contraseña"
+      >
+        <Eye id="eye-icon" class="h-5 w-5" />
+        <EyeOff id="eye-off-icon" class="h-5 w-5 hidden" />
+      </button>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        type="submit"
+        id="login-button"
+        class="bg-blue-800 text-white py-2 px-6 rounded font-semibold border border-blue-500 hover:bg-blue-700 flex items-center gap-2 cursor-pointer text-sm"
+      >
+        <span id="button-text">Entrar</span>
+        <LoaderCircle id="spinner" class="h-5 w-5 animate-spin hidden" />
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-4 text-center space-y-2">
+    <a
+      href="/olvide-contrasena"
+      class="text-sm text-blue-400 hover:underline block"
+    >
+      ¿Olvidaste tu contraseña?
+    </a>
+    <a href="/register" class="text-sm text-gray-300 hover:underline">
+      ¿No tienes cuenta? Regístrate aquí
+    </a>
+  </div>
+
+  <script is:inline>
+    const form = document.getElementById('login-form')
+    const button = document.getElementById('login-button')
+    const spinner = document.getElementById('spinner')
+    const text = document.getElementById('button-text')
+
+    form?.addEventListener('submit', () => {
+      button.disabled = true
+      spinner.classList.remove('hidden')
+      text.textContent = 'Entrando...'
+    })
+
+    // Mostrar/ocultar contraseña
+    const passwordInput = document.getElementById('password-input')
+    const toggleBtn = document.getElementById('toggle-password')
+    const eyeIcon = document.getElementById('eye-icon')
+    const eyeOffIcon = document.getElementById('eye-off-icon')
+
+    toggleBtn?.addEventListener('click', () => {
+      const isVisible = passwordInput.type === 'text'
+      passwordInput.type = isVisible ? 'password' : 'text'
+
+      eyeIcon.classList.toggle('hidden', !isVisible)
+      eyeOffIcon.classList.toggle('hidden', isVisible)
+    })
+  </script>
+</section>

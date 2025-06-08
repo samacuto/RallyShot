@@ -1,13 +1,12 @@
 import type { APIRoute } from 'astro'
 
-export const prerender = false
-
 export const POST: APIRoute = async ({ request }) => {
   const formData = await request.formData()
   const emailOrUsername = formData.get('emailOrUsername')
   const password = formData.get('password')
 
   const backendURL = import.meta.env.PUBLIC_BACKEND_BASE_URL
+
   const res = await fetch(`${backendURL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -16,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const data = await res.json()
 
-  // 🛑 Usuario no verificado
+  // Usuario no verificado
   if (data?.error?.includes('verificada')) {
     // Intentamos recuperar el userId del backend (si lo tienes disponible)
     const getUserIdRes = await fetch(`${backendURL}/api/auth/get-user-id`, {
@@ -46,7 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
     })
   }
 
-  // ✅ Login exitoso
+  // Login exitoso
   if (res.ok) {
     const isAdmin = data.rol === 'admin'
 
@@ -59,11 +58,15 @@ export const POST: APIRoute = async ({ request }) => {
     })
   }
 
-  // ❌ Error genérico
+  // Error de login: pasar mensaje a la URL
+  const params = new URLSearchParams({
+    error: encodeURIComponent(data.error || 'Error desconocido'),
+  })
+
   return new Response(null, {
     status: 302,
     headers: {
-      Location: '/login?error=1',
+      Location: `/login?${params.toString()}`,
     },
   })
 }

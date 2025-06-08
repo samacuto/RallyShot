@@ -3,8 +3,9 @@ import Layout from '@layouts/Layout.astro'
 import WarpBackground from '@components/WarpBackground.tsx'
 import PerfilCard from '@sections/PerfilCard.astro'
 import PerfilForm from '@components/PerfilForm.astro'
+import type { Usuario } from '@lib/types/types'
 
-const user = Astro.locals.user ?? null
+const user = Astro.locals.user as Usuario | null
 ---
 
 <Layout user={user} title="Perfil | RallyShot">
@@ -44,7 +45,7 @@ const user = Astro.locals.user ?? null
         </div>
 
         <div id="editForm" class="hidden">
-          <PerfilForm user={user} />
+          {user && <PerfilForm user={user} />}
         </div>
 
         {
@@ -52,8 +53,8 @@ const user = Astro.locals.user ?? null
             <div class="text-center mt-4">
               <button
                 id="editButton"
-                class="px-4 py-2 text-xs font-medium text-white border-2 border-blue-800 bg-blue-600 rounded-md
-                     hover:border-blue-600 hover:bg-blue-500/30 cursor-pointer
+                class="px-4 py-2 text-sm  text-white border border-blue-500 bg-blue-800 rounded-md
+                     hover:bg-blue-700 cursor-pointer
                      transition-colors duration-200 ease-in-out"
               >
                 Editar perfil
@@ -65,7 +66,6 @@ const user = Astro.locals.user ?? null
     </section>
 
     <script is:inline>
-      // Referencias a elementos en el DOM
       const profileDiv = document.getElementById('profile')
       const editForm = document.getElementById('editForm')
       const editButton = document.getElementById('editButton')
@@ -80,7 +80,7 @@ const user = Astro.locals.user ?? null
 
           currentUser = data
 
-          // Rellenar inputs del formulario (excepto archivo)
+          // Rellenar inputs del formulario
           Object.entries(currentUser).forEach(([key, value]) => {
             const input = editForm.querySelector(`[name="${key}"]`)
             if (input && value != null && input.type !== 'file') {
@@ -147,7 +147,6 @@ const user = Astro.locals.user ?? null
 
           if (!res.ok) throw new Error(data.error || 'Error al actualizar')
 
-          // Tras actualizar, recargamos la página para que PerfilCard se renderice con datos nuevos:
           location.reload()
         } catch (err) {
           alert(err.message ?? 'Error al actualizar el perfil')

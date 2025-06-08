@@ -1,13 +1,8 @@
 ---
+import type { Usuario } from '@lib/types/types'
+
 interface Props {
-  user: {
-    nombre: string
-    apellidos: string
-    email: string
-    display_name: string
-    pais: string
-    fecha_nacimiento: string
-  }
+  user: Usuario
 }
 
 const { user } = Astro.props

@@ -36,8 +36,12 @@ export const POST: APIRoute = async ({ request }) => {
     })
   }
 
+  const params = new URLSearchParams({
+    error: result.error || 'Error desconocido',
+  })
+
   return new Response(null, {
     status: 302,
-    headers: { Location: '/register?error=1' },
+    headers: { Location: `/register?${params.toString()}` },
   })
 }

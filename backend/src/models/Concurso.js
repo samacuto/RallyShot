@@ -22,7 +22,7 @@ class Concurso {
       .order('fecha_inicio', { ascending: false })
 
     if (error) {
-      console.error('❌ Supabase error:', error)
+      console.error('Supabase error:', error)
       throw new Error('Error al consultar los concursos')
     }
 
@@ -36,7 +36,7 @@ class Concurso {
       .select('id')
 
     if (error) {
-      console.error('❌ Error desde Supabase:', error)
+      console.error('Error desde Supabase:', error)
       throw new Error(error.message)
     }
 

@@ -1,5 +1,7 @@
 ---
-import { Calendar, User } from '@lucide/astro'
+/// <reference types="astro/client" />
+// src/components/FotoCard.astro
+import { Calendar, User, Heart } from '@lucide/astro'
 import { Image } from 'astro:assets'
 
 interface PhotoCardProps {
@@ -24,6 +26,7 @@ const {
 ---
 
 <article class="bg-primary rounded-lg overflow-hidden border border-gray-700">
+  <!-- Imagen y overlay -->
   <div
     class="group relative w-full flex justify-center items-center bg-primary max-h-[32rem] overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.02] hover:z-10"
   >
@@ -46,9 +49,12 @@ const {
     </div>
   </div>
 
+  <!-- Contenido principal: título, descripción, autor -->
   <div class="p-6 mb-10">
-    <h2 class="text-3xl font-bold text-center text-gray-100 mb-1">
-      {titulo.replace(/^"(.*)"$/, '$1')}
+    <h2
+      class="text-3xl font-bold text-center font-merriweather text-gray-100 mb-1"
+    >
+      {titulo.replace(/^\"(.*)\"$/, '$1')}
     </h2>
 
     <p class="text-gray-400 text-center text-lg mb-4 italic">
@@ -60,19 +66,69 @@ const {
       <span>Autor: <span class="text-gray-200">{autor}</span></span>
     </p>
 
+    <!-- Fecha y voto -->
     <div
       class="flex items-center justify-between text-base text-gray-400 ml-22"
     >
+      <!-- Fecha de subida -->
       <div class="flex items-center gap-1">
         <Calendar class="w-4 h-4" />
-        <span class="text-gray-400">Fecha de publicación:</span>
-
         <time class="text-gray-200" datetime={fecha_subida}>
           {new Date(fecha_subida).toLocaleDateString()}
         </time>
       </div>
 
-      <span class="text-lg mr-22 text-blue-600">{total_votos} votos</span>
+      <!-- Botón de voto con corazón -->
+      <div class="flex items-center gap-2">
+        <button
+          class="vote-btn p-1 rounded-full transition"
+          data-photo-id={id}
+          aria-label="Votar esta foto"
+        >
+          <Heart class="w-6 h-6 transition-colors" />
+        </button>
+        <span class="vote-count text-lg text-blue-600">{total_votos}</span>
+      </div>
     </div>
   </div>
+
+  <!-- Script cliente que llama al endpoint de Astro -->
+  <script client:load>
+    console.log('FotoCard hydrated for:', '${id}')
+    const storageKey = 'votedPhotos'
+    const photoId = '${id}'
+
+    // Seleccionar elementos
+    const btn = document.querySelector(`.vote-btn[data-photo-id="${photoId}"]`)
+    if (!btn) return
+    const icon = btn.querySelector('svg')
+    const countSpan = btn.nextElementSibling
+
+    // Cargar votos previos
+    let voted = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    icon.classList.add(
+      voted.includes(photoId) ? 'text-red-500' : 'text-gray-400'
+    )
+
+    btn.addEventListener('click', async () => {
+      if (voted.includes(photoId)) return
+
+      try {
+        const res = await fetch('/api/votos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoId }),
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+        // Actualizar cache y UI
+        voted.push(photoId)
+        localStorage.setItem(storageKey, JSON.stringify(voted))
+        icon.classList.replace('text-gray-400', 'text-red-500')
+        countSpan.textContent = String(Number(countSpan.textContent) + 1)
+      } catch (err) {
+        console.error('Error al votar:', err)
+      }
+    })
+  </script>
 </article>

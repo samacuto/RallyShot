@@ -1,19 +1,19 @@
 ---
-import RallyShotLogo from '@components/RallyShotLogo.astro'
+import RallyShotLogo from '@assets/rallyshot-logo.svg'
 import { LogOut, LogIn } from '@lucide/astro'
 
 const { user = null } = Astro.props
 ---
 
 <header
-  class="py-4 px-6 bg-primary shadow-md flex justify-between items-center"
+  class="py-4 px-6 bg-primary shadow-md flex justify-between items-center border-b border-gray-900"
 >
   <a
     href="/"
-    class="group inline-flex items-center transition-transform duration-200 hover:translate-x-1"
+    class="group inline-flex items-center transition-transform duration-200 ease-in-out hover:scale-[1.01] hover:-rotate-1"
     aria-label="Inicio"
   >
-    <RallyShotLogo class="h-10 w-auto" />
+    <RallyShotLogo class="h-10 w-auto origin-center" />
   </a>
 
   {

@@ -1,4 +1,5 @@
 import type { MiddlewareHandler } from 'astro'
+import type { Usuario } from '@lib/types/types'
 import cookie from 'cookie'
 
 const PUBLIC_PATHS = [
@@ -14,8 +15,6 @@ export const onRequest: MiddlewareHandler = async (
   { request, url, locals },
   next
 ) => {
-  console.log('Middleware de Astro ejecutado para:', url.pathname)
-
   const cookies = cookie.parse(request.headers.get('cookie') ?? '')
   const token = cookies.access_token
 
@@ -35,23 +34,22 @@ export const onRequest: MiddlewareHandler = async (
     })
 
     if (res.ok) {
-      const user = await res.json()
-      locals.user = user
-      console.log('Usuario autenticado:', JSON.stringify(user, null, 2))
+      const data = await res.json()
+
+      locals.user = data as Usuario
+
+      console.log('Usuario autenticado:', JSON.stringify(data, null, 2))
     } else {
       console.warn('Token inválido')
     }
   }
 
-  if (isPublic) {
-    return next()
-  }
+  if (isPublic) return next()
 
   if (!token || !locals.user) {
     const response = await next()
 
     if (response.status < 400) {
-      console.warn('Sin token válido. Redirigiendo a /login...')
       return new Response(null, {
         status: 302,
         headers: { Location: '/login' },
@@ -62,7 +60,6 @@ export const onRequest: MiddlewareHandler = async (
   }
 
   if (url.pathname.startsWith('/admin') && locals.user.rol !== 'admin') {
-    console.warn('Acceso bloqueado: no es admin. Redirigiendo a /perfil...')
     return new Response(null, {
       status: 302,
       headers: { Location: '/perfil' },

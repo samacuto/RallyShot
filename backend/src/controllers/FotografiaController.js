@@ -127,7 +127,10 @@ class FotografiaController {
 
   static async getRankingGlobal(req, res) {
     try {
-      const fotos = await Fotografia.getRankingGlobal()
+      // Leer límite de query string, por defecto 10
+      const limit = Number(req.query.limit) || 10
+
+      const fotos = await Fotografia.getRankingGlobal(limit)
       res.status(200).json(fotos)
     } catch (error) {
       console.error('Error al obtener ranking global:', error)
@@ -138,16 +141,13 @@ class FotografiaController {
   static async getPendingByContest(req, res) {
     try {
       const contestId = req.params.contestId
+      console.log('🔍 Obteniendo fotos pendientes para concurso:', contestId)
 
       const photos = await Fotografia.getPendingByContest(contestId)
       res.status(200).json(photos)
     } catch (error) {
-      console.error('Error al obtener fotos pendientes por concurso:', error)
-      res
-        .status(500)
-        .json({
-          error: 'No se pudieron obtener las fotos pendientes del concurso',
-        })
+      console.error('❌ Error getPendingByContest:', error)
+      res.status(500).json({ error: error.message })
     }
   }
 }
