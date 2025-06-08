@@ -4,33 +4,42 @@ export const prerender = false
 ---
 
 <Layout>
-  <section class="max-w-md mx-auto mt-16 p-6 bg-white rounded shadow">
-    <h1 class="text-xl font-bold mb-4 text-center">Verifica tu cuenta</h1>
+  <section
+    class="max-w-xl mx-auto mt-16 p-6 rounded-lg border border-gray-700 bg-primary mb-12"
+  >
+    <h1 class="text-xl font-semibold mb-6 text-gray-200">Verifica tu cuenta</h1>
     <form id="verifForm" class="space-y-4">
-      <input
-        required
-        name="userId"
-        id="userId"
-        placeholder="ID de usuario"
-        class="input"
-      />
-      <input
-        required
-        name="codigo"
-        id="codigo"
-        placeholder="Código de verificación"
-        class="input"
-      />
-      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded"
-        >Confirmar</button
-      >
+      <label class="block text-sm text-gray-200 font-semibold">
+        ID de usuario
+        <input
+          required
+          name="userId"
+          id="userId"
+          class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+        />
+      </label>
+      <label class="block text-sm text-gray-200 font-semibold">
+        Código de verificación
+        <input
+          required
+          name="codigo"
+          id="codigo"
+          class="mt-1 w-full p-3 rounded border border-gray-700 bg-primary text-white text-sm shadow-sm font-normal"
+        />
+      </label>
+      <div class="flex justify-end gap-4 pt-2">
+        <button
+          type="submit"
+          class="mt-6 inline-flex items-center gap-2 px-3 py-2 bg-blue-800 text-white text-sm border border-blue-500 rounded-md hover:opacity-85 hover:border-blue-400 transition shadow cursor-pointer"
+        >
+          Confirmar
+        </button>
+      </div>
     </form>
-    <p id="message" class="mt-4 text-center text-sm"></p>
+    <p id="message" class="mt-4 text-sm font-normal text-gray-200"></p>
   </section>
 
   <script type="module" is:inline>
-    console.log('🟢 SCRIPT CARGADO')
-
     const form = document.getElementById('verifForm')
     const message = document.getElementById('message')
     const userIdInput = document.getElementById('userId')
@@ -47,8 +56,6 @@ export const prerender = false
         codigo: codigoInput.value.trim(),
       }
 
-      console.log('📤 Enviando:', data)
-
       try {
         const res = await fetch('/api/verificar', {
           method: 'POST',
@@ -57,31 +64,21 @@ export const prerender = false
         })
 
         const result = await res.json()
-        console.log('📥 Respuesta:', result)
 
         if (res.ok) {
           message.textContent =
-            '✅ Cuenta verificada correctamente. Redirigiendo...'
-          message.className = 'text-green-600 text-center'
+            'Cuenta verificada correctamente. Redirigiendo...'
+          message.className = 'mt-4 text-sm font-normal text-green-400'
           setTimeout(() => (window.location.href = '/login'), 3000)
         } else {
-          message.textContent = '❌ ' + (result.error || 'Error al verificar')
-          message.className = 'text-red-600 text-center'
+          message.textContent = result.error || 'Error al verificar'
+          message.className = 'mt-4 text-sm font-normal text-red-400'
         }
       } catch (err) {
         console.error('❌ Error al verificar:', err)
-        message.textContent = '❌ Error inesperado. Intenta más tarde.'
-        message.className = 'text-red-600 text-center'
+        message.textContent = 'Error inesperado. Intenta más tarde.'
+        message.className = 'mt-4 text-sm font-normal text-red-400'
       }
     })
   </script>
-
-  <style>
-    .input {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 0.375rem;
-    }
-  </style>
 </Layout>

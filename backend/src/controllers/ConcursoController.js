@@ -73,7 +73,7 @@ class ConcursoController {
       })
 
       res.status(201).json({
-        message: 'Foto subida correctamente y está pendiente de revisión',
+        message: 'Foto subida correctamente y está pendiente de revisión.',
       })
     } catch (error) {
       console.error('Error subiendo foto:', error)

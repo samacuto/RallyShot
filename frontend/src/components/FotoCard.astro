@@ -25,7 +25,10 @@ const {
 } = Astro.props as PhotoCardProps
 ---
 
-<article class="bg-primary rounded-lg overflow-hidden border border-gray-700">
+<article
+  class="bg-primary rounded-lg overflow-hidden border border-gray-700"
+  data-photo-id={id}
+>
   <!-- Imagen y overlay -->
   <div
     class="group relative w-full flex justify-center items-center bg-primary max-h-[32rem] overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.02] hover:z-10"
@@ -50,85 +53,95 @@ const {
   </div>
 
   <!-- Contenido principal: título, descripción, autor -->
-  <div class="p-6 mb-10">
+  <div class="p-6 pb-4">
     <h2
       class="text-3xl font-bold text-center font-merriweather text-gray-100 mb-1"
     >
-      {titulo.replace(/^\"(.*)\"$/, '$1')}
+      {titulo.replace(/^"(.*)"$/, '$1')}
     </h2>
 
     <p class="text-gray-400 text-center text-lg mb-4 italic">
       {descripcion || 'Sin descripción.'}
     </p>
 
-    <p class="text-gray-400 text-base mb-4 ml-22 flex items-center gap-2">
-      <User class="w-4 h-4 text-gray-400" />
-      <span>Autor: <span class="text-gray-200">{autor}</span></span>
+    <p class="text-white text-base mb-2 flex items-center gap-2">
+      <User class="w-4 h-4 text-white" />
+      <span>Autor: <span class="text-white">{autor}</span></span>
     </p>
 
-    <!-- Fecha y voto -->
-    <div
-      class="flex items-center justify-between text-base text-gray-400 ml-22"
-    >
-      <!-- Fecha de subida -->
-      <div class="flex items-center gap-1">
-        <Calendar class="w-4 h-4" />
-        <time class="text-gray-200" datetime={fecha_subida}>
-          {new Date(fecha_subida).toLocaleDateString()}
-        </time>
-      </div>
+    <!-- Fecha de subida -->
+    <p class="text-white text-base mb-4 flex items-center gap-2">
+      <Calendar class="w-4 h-4" />
+      <time class="text-white" datetime={fecha_subida}>
+        {new Date(fecha_subida).toLocaleDateString()}
+      </time>
+    </p>
+  </div>
 
-      <!-- Botón de voto con corazón -->
-      <div class="flex items-center gap-2">
-        <button
-          class="vote-btn p-1 rounded-full transition"
-          data-photo-id={id}
-          aria-label="Votar esta foto"
-        >
-          <Heart class="w-6 h-6 transition-colors" />
-        </button>
-        <span class="vote-count text-lg text-blue-600">{total_votos}</span>
-      </div>
-    </div>
+  <!-- Botón de voto y contador -->
+  <div class="flex items-center justify-center px-6 pb-6">
+    <button
+      class="vote-btn p-1 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
+      aria-label="Votar esta foto"
+    >
+      <Heart
+        class="w-6 h-6 transition-all duration-300 text-white hover:text-red-400"
+      />
+    </button>
+    <span class="vote-count text-lg font-medium text-white">{total_votos}</span>
   </div>
 
   <!-- Script cliente que llama al endpoint de Astro -->
-  <script client:load>
-    console.log('FotoCard hydrated for:', '${id}')
-    const storageKey = 'votedPhotos'
-    const photoId = '${id}'
+  <script type="module" src="/scripts/voteHandler.js"></script>
 
-    // Seleccionar elementos
-    const btn = document.querySelector(`.vote-btn[data-photo-id="${photoId}"]`)
-    if (!btn) return
-    const icon = btn.querySelector('svg')
-    const countSpan = btn.nextElementSibling
-
-    // Cargar votos previos
-    let voted = JSON.parse(localStorage.getItem(storageKey) || '[]')
-    icon.classList.add(
-      voted.includes(photoId) ? 'text-red-500' : 'text-gray-400'
-    )
-
-    btn.addEventListener('click', async () => {
-      if (voted.includes(photoId)) return
-
-      try {
-        const res = await fetch('/api/votos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ photoId }),
-        })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-        // Actualizar cache y UI
-        voted.push(photoId)
-        localStorage.setItem(storageKey, JSON.stringify(voted))
-        icon.classList.replace('text-gray-400', 'text-red-500')
-        countSpan.textContent = String(Number(countSpan.textContent) + 1)
-      } catch (err) {
-        console.error('Error al votar:', err)
+  <style>
+    @keyframes shake {
+      0%,
+      100% {
+        transform: translateX(0);
       }
-    })
-  </script>
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    @keyframes heartbeat {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes count-up {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .animate-shake {
+      animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    .animate-heartbeat {
+      animation: heartbeat 1s ease-in-out;
+    }
+
+    .animate-count-up {
+      animation: count-up 1s ease-in-out;
+    }
+  </style>
 </article>

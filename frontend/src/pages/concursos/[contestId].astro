@@ -4,7 +4,6 @@ import GaleriaConcursoSection from '@sections/GaleriaConcursoSection.astro'
 import WarpBackground from '@components/WarpBackground.tsx'
 import type { Concurso } from '@lib/types/types'
 
-// 1) Definimos aquí la misma lista de esquemas EXACTA que en ConcursosSection.astro
 const schemes = [
   {
     color1: '#ff416c',
@@ -182,15 +181,17 @@ const user = Astro.locals.user ?? null
       {
         enSubidaAbierta && (
           <section id="inscripcion-container" class="mb-8">
-            <div class="max-w-xl font-light mx-auto rounded border border-green-500 bg-primary text-gray-200 p-4 text-center">
+            <div class="max-w-xl mx-auto rounded-lg border border-gray-700 bg-primary p-6 text-gray-200">
               {user ? (
-                <p>Comprobando estado de inscripción…</p>
+                <p class="text-sm font-normal">
+                  Comprobando estado de inscripción…
+                </p>
               ) : (
-                <p>
+                <p class="text-sm font-normal">
                   Debes{' '}
                   <a
                     href="/login"
-                    class="text-blue-600 font-bold underline hover:text-blue-500"
+                    class="text-blue-400 hover:text-blue-300 transition-colors"
                   >
                     iniciar sesión
                   </a>{' '}
@@ -221,9 +222,9 @@ const user = Astro.locals.user ?? null
   <!-- Solo cargamos el script de inscripción si está en periodo de subida -->
   {
     enSubidaAbierta && user && (
-      <script type="module" define:vars={{ user, contestId }}>
+      <script type="module" define:vars={{ user, contestId, concurso }}>
         import {initInscripcion} from '/scripts/participacion.js'
-        initInscripcion({(user, contestId)})
+        initInscripcion({ user, contestId, contestName: concurso?.nombre || 'este concurso' })
       </script>
     )
   }
